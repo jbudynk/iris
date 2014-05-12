@@ -30,6 +30,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import uk.ac.starlink.table.StarTable;
 import uk.ac.starlink.table.StoragePolicy;
@@ -43,22 +46,31 @@ import uk.ac.starlink.votable.VOTableBuilder;
 public class VizierImporter {
 
     public static final String VIZIER_DATA_DEFAULT_ENDPOINT =
-            "http://cdsarc.u-strasbg.fr/viz-bin/sed?-c=:targetName";
+            "http://cdsarc.u-strasbg.fr/viz-bin/sed?-c=:targetName&-c.rs=:searchRadius";
+    
+    public static final String DEFAULT_SEARCH_RADIUS = "5";
 
     public static Collection<Segment> getSedFromName(String targetName) throws SegmentImporterException {
-        return getSedFromName(targetName, VIZIER_DATA_DEFAULT_ENDPOINT);
+        return getSedFromName(targetName, DEFAULT_SEARCH_RADIUS, VIZIER_DATA_DEFAULT_ENDPOINT);
     }
 
-    public static Collection<Segment> getSedFromName(String targetName, String endpoint) throws SegmentImporterException {
+    public static Collection<Segment> getSedFromName(String targetName, String searchRadius) throws SegmentImporterException {
+        return getSedFromName(targetName, searchRadius, VIZIER_DATA_DEFAULT_ENDPOINT);
+    }
+
+    public static Collection<Segment> getSedFromName(String targetName, String searchRadius, String endpoint) throws SegmentImporterException {
         try {
             targetName = URLEncoder.encode(targetName, "UTF-8");
-            endpoint = endpoint.replace(":targetName", targetName);
+            searchRadius = URLEncoder.encode(searchRadius, "UTF-8");
+            endpoint = endpoint.replace(":targetName&-c.rs=:searchRadius", targetName+"&-c.rs="+searchRadius);
             URL nedUrl = new URL(endpoint);
 
             VOTableBuilder vob = new VOTableBuilder();
             StarTable table = vob.makeStarTable(new URLDataSource(nedUrl), true, StoragePolicy.ADAPTIVE);
 
             Map<String, Segment> segMap = new HashMap();
+            
+            ArrayList<Double[]> pointsList = new ArrayList<Double[]>();
 
             for (long i = 0; i < table.getRowCount(); i++) {
                 Double ra = (Double) table.getCell(i, 0);
@@ -101,14 +113,85 @@ public class VizierImporter {
                 ef.setUcd("stat.error;phot.flux.density");
                 ef.setUnit("Jy");
                 s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
+                
+                Double[] points = {spectral, flux, err};
+                pointsList.add(points);
             }
-
-
+            
+            System.out.println("At least I'm printing to screen");
+            
+            Set<Double[]> lump = new HashSet<Double[]>();
+            for (Double[] i : pointsList) {
+                System.out.println("We're in the forloop! i = " + i);
+                if (lump.contains(i)) {
+                    lump.add(i);
+                    System.out.println("Found Duplicates\n");
+                    System.out.println("Points: (" + i[0] + ", " + i[1] + "+/-" + i[2] + ")");
+                    
+                }
+            }
+            
             return segMap.values();
 
         } catch (Exception ex) {
             throw new SegmentImporterException(ex);
         }
+    }
+    
+    
+    /*
+    boolean duplicates(final int[] zipcodelist) {
+        Set<Integer> lump = new HashSet<Integer>();
+        for (int i : zipcodelist)
+        {
+            if (lump.contains(i)) return true;
+            lump.add(i);
+        }
+        return false;
+    }
+     *
+     */
+    
+    
+    /* Check for duplicate points.
+     * 
+     * If duplicate point values are in segMap, fire VizierDuplicatePointsFrame
+     * and based on the user input, keep or remove all duplicate points.
+     * 
+     * Check for duplicate points
+     * 
+     * TODO
+     */
+    /*
+    Iterator iter = segMap.entrySet().iterator();
+    while (iter.hasNext()) {
+        segMap.values().getDataValues("Spectrum.Data.SpectralAxis.Value");
+    }
+    Integer keySize = segMap.values().getDataValues().size();
+    Set valueSetSize = new HashSet(segMap.values());
+    if (keySize != valueSetSize.size()) {
+        System.out.println("\n Not the same size! \n");
+        System.out.println("segMap size = " + keySize);
+        System.out.println("valueSetSize = " + valueSetSize.size() + "\n");
+    }
+
+    /*.getDataValues("Spectrum.Data.FluxAxis.Value");*/
+    /*Set<Segment> pointsSet = new HashSet<Segment>(Arrays.asList(segMap.values().getPoint()));*/
+
+
+
+    /* If keep, return segMap as-is
+    return segMap.values();
+
+    /* If remove duplicates, remove the duplicate points. Points that  
+     * have associated errors will be kept over points with no
+     * uncertainties.
+     * 
+     * TODO
+     */
+    
+    /*public void getSedFromSAMP(Mtype sampMessage, String sampUrl) {*/
+        
     }
 //    public static Sed getError() throws SegmentImporterException {
 //        try {
@@ -118,4 +201,3 @@ public class VizierImporter {
 //        }
 //        throw new SegmentImporterException(new ConnectException());
 //    }
-}
