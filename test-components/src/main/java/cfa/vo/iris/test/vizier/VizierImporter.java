@@ -43,16 +43,23 @@ import uk.ac.starlink.votable.VOTableBuilder;
 public class VizierImporter {
 
     public static final String VIZIER_DATA_DEFAULT_ENDPOINT =
-            "http://cdsarc.u-strasbg.fr/viz-bin/sed?-c=:targetName";
+            "http://cdsarc.u-strasbg.fr/viz-bin/sed?-c=:targetName&-c.rs=:searchRadius";
+    
+    public static final String DEFAULT_SEARCH_RADIUS = "5";
 
     public static Collection<Segment> getSedFromName(String targetName) throws SegmentImporterException {
-        return getSedFromName(targetName, VIZIER_DATA_DEFAULT_ENDPOINT);
+        return getSedFromName(targetName, DEFAULT_SEARCH_RADIUS, VIZIER_DATA_DEFAULT_ENDPOINT);
     }
 
-    public static Collection<Segment> getSedFromName(String targetName, String endpoint) throws SegmentImporterException {
+    public static Collection<Segment> getSedFromName(String targetName, String searchRadius) throws SegmentImporterException {
+        return getSedFromName(targetName, searchRadius, VIZIER_DATA_DEFAULT_ENDPOINT);
+    }
+
+    public static Collection<Segment> getSedFromName(String targetName, String searchRadius, String endpoint) throws SegmentImporterException {
         try {
             targetName = URLEncoder.encode(targetName, "UTF-8");
-            endpoint = endpoint.replace(":targetName", targetName);
+            searchRadius = URLEncoder.encode(searchRadius, "UTF-8");
+            endpoint = endpoint.replace(":targetName&-c.rs=:searchRadius", targetName+"&-c.rs="+searchRadius);
             URL nedUrl = new URL(endpoint);
 
             VOTableBuilder vob = new VOTableBuilder();
@@ -102,13 +109,54 @@ public class VizierImporter {
                 ef.setUnit("Jy");
                 s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
             }
-
-
+            
             return segMap.values();
 
         } catch (Exception ex) {
             throw new SegmentImporterException(ex);
         }
+    }
+    
+    
+    /* Check for duplicate points.
+     * 
+     * If duplicate point values are in segMap, fire VizierDuplicatePointsFrame
+     * and based on the user input, keep or remove all duplicate points.
+     * 
+     * Check for duplicate points
+     * 
+     * TODO
+     */
+    /*
+    Iterator iter = segMap.entrySet().iterator();
+    while (iter.hasNext()) {
+        segMap.values().getDataValues("Spectrum.Data.SpectralAxis.Value");
+    }
+    Integer keySize = segMap.values().getDataValues().size();
+    Set valueSetSize = new HashSet(segMap.values());
+    if (keySize != valueSetSize.size()) {
+        System.out.println("\n Not the same size! \n");
+        System.out.println("segMap size = " + keySize);
+        System.out.println("valueSetSize = " + valueSetSize.size() + "\n");
+    }
+
+    /*.getDataValues("Spectrum.Data.FluxAxis.Value");*/
+    /*Set<Segment> pointsSet = new HashSet<Segment>(Arrays.asList(segMap.values().getPoint()));*/
+
+
+
+    /* If keep, return segMap as-is
+    return segMap.values();
+
+    /* If remove duplicates, remove the duplicate points. Points that  
+     * have associated errors will be kept over points with no
+     * uncertainties.
+     * 
+     * TODO
+     */
+    
+    public void getSedFromSAMP(String targetName, String searchRadius, String endpoint) {
+        
     }
 //    public static Sed getError() throws SegmentImporterException {
 //        try {
