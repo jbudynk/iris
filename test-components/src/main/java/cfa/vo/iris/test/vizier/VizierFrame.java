@@ -131,7 +131,7 @@ public class VizierFrame extends javax.swing.JInternalFrame {
         jTextArea1.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
         jTextArea1.setColumns(20);
         jTextArea1.setEditable(false);
-        jTextArea1.setFont(new java.awt.Font("Lucida Grande", 0, 12));
+        jTextArea1.setFont(new java.awt.Font("Lucida Grande", 0, 12)); // NOI18N
         jTextArea1.setLineWrap(true);
         jTextArea1.setRows(4);
         jTextArea1.setText("For full control over the imported VizieR data, use the Photometry Viewer web service at http://vizier.u-strasbg.fr/vizier/sed/ then SAMP the data to Iris.");

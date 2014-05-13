@@ -70,7 +70,9 @@ public class VizierImporter {
 
             Map<String, Segment> segMap = new HashMap();
             
-            ArrayList<Double[]> pointsList = new ArrayList<Double[]>();
+            ArrayList<Double[]> pointList = new ArrayList<Double[]>();
+            ArrayList<String> pointStringList = new ArrayList<String>();
+            Set<String> pointSet = new HashSet<String>();
 
             for (long i = 0; i < table.getRowCount(); i++) {
                 Double ra = (Double) table.getCell(i, 0);
@@ -114,22 +116,32 @@ public class VizierImporter {
                 ef.setUnit("Jy");
                 s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
                 
-                Double[] points = {spectral, flux, err};
-                pointsList.add(points);
+                String points = String.valueOf(spectral)+String.valueOf(flux)+String.valueOf(err);
+                //Double[] points = {spectral, flux, err};
+                if (pointSet.contains(points)) {
+                    System.out.println("Found Duplicates");
+                    System.out.println(points);
+                } else {
+                    pointSet.add(points);
+                    System.out.println("Added a point.");
+                }
+                pointStringList.add(points);
             }
             
-            System.out.println("At least I'm printing to screen");
-            
-            Set<Double[]> lump = new HashSet<Double[]>();
-            for (Double[] i : pointsList) {
-                System.out.println("We're in the forloop! i = " + i);
-                if (lump.contains(i)) {
-                    lump.add(i);
-                    System.out.println("Found Duplicates\n");
-                    System.out.println("Points: (" + i[0] + ", " + i[1] + "+/-" + i[2] + ")");
-                    
+            /*for (String i : pointsStringList) {
+                System.out.println("Point: "+i);
+                if (set.contains(i)) {
+                    System.out.println("Found Duplicates");
+                    System.out.println(i);
+                } else {
+                    set.add(i);
+                    System.out.println("Added a point.");
                 }
             }
+            
+            System.out.println(set.size()+": Number of unique points");
+            System.out.println(pointsStringList.size()+": Number of all points");
+            */
             
             return segMap.values();
         }   
