@@ -132,13 +132,13 @@ public class VizierImporter {
             }
             
             return segMap.values();
-
-        } catch (Exception ex) {
+        }   
+         catch (Exception ex) {
             throw new SegmentImporterException(ex);
-        }
+         }
     }
-    
-    
+}
+            
     /*
     boolean duplicates(final int[] zipcodelist) {
         Set<Integer> lump = new HashSet<Integer>();
@@ -151,7 +151,6 @@ public class VizierImporter {
     }
      *
      */
-    
     
     /* Check for duplicate points.
      * 
@@ -192,7 +191,6 @@ public class VizierImporter {
     
     /*public void getSedFromSAMP(Mtype sampMessage, String sampUrl) {*/
         
-    }
 //    public static Sed getError() throws SegmentImporterException {
 //        try {
 //            Thread.sleep(5000);
