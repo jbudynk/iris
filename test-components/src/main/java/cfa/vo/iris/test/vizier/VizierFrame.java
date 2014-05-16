@@ -34,6 +34,7 @@ public class VizierFrame extends javax.swing.JInternalFrame {
     
     private String searchRadius;
     public static final String PROP_SEARCHRADIUS = "searchRadius";
+    private boolean remove;
 
     /**
      * Get the value of name
@@ -82,6 +83,7 @@ public class VizierFrame extends javax.swing.JInternalFrame {
     private void initComponents() {
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
@@ -92,6 +94,8 @@ public class VizierFrame extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
         sedCreationType = new javax.swing.JComboBox();
+        jLabel4 = new javax.swing.JLabel();
+        removeOrKeepComboBox = new javax.swing.JComboBox();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -131,7 +135,7 @@ public class VizierFrame extends javax.swing.JInternalFrame {
         jTextArea1.setBackground(javax.swing.UIManager.getDefaults().getColor("Button.background"));
         jTextArea1.setColumns(20);
         jTextArea1.setEditable(false);
-        jTextArea1.setFont(new java.awt.Font("Lucida Grande", 0, 12)); // NOI18N
+        jTextArea1.setFont(new java.awt.Font("Lucida Grande", 0, 12));
         jTextArea1.setLineWrap(true);
         jTextArea1.setRows(4);
         jTextArea1.setText("For full control over the imported VizieR data, use the Photometry Viewer web service at http://vizier.u-strasbg.fr/vizier/sed/ then SAMP the data to Iris.");
@@ -145,7 +149,7 @@ public class VizierFrame extends javax.swing.JInternalFrame {
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -163,29 +167,43 @@ public class VizierFrame extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel4.setText("Remove or keep duplicate photometric points?");
+        jLabel4.setName("jLabel4"); // NOI18N
+
+        removeOrKeepComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Remove", "Keep" }));
+        removeOrKeepComboBox.setName("removeOrKeepComboBox"); // NOI18N
+        removeOrKeepComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeOrKeepComboBoxActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jButton1)
+                    .add(layout.createSequentialGroup()
+                        .add(jLabel1)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(jTextField1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE))
+                    .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jLabel1)
-                            .add(jLabel3))
-                        .add(19, 19, 19)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(jTextField1)
-                            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                                .add(jButton1)
-                                .add(layout.createSequentialGroup()
-                                    .add(jTextField2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 92, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                    .add(2, 2, 2)
-                                    .add(jLabel2)
-                                    .add(27, 27, 27)
-                                    .add(sedCreationType, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))))
+                            .add(layout.createSequentialGroup()
+                                .add(jLabel3)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jTextField2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 92, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(18, 18, 18)
+                                .add(jLabel2))
+                            .add(jLabel4))
+                        .add(25, 25, 25)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(sedCreationType, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(removeOrKeepComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(jPanel1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -193,14 +211,20 @@ public class VizierFrame extends javax.swing.JInternalFrame {
             .add(layout.createSequentialGroup()
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jLabel1))
+                    .add(jLabel1)
+                    .add(jTextField1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(18, 18, 18)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jLabel2)
+                        .add(sedCreationType, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jLabel3)
+                        .add(jTextField2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                 .add(18, 18, 18)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jTextField2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jLabel2)
-                    .add(jLabel3)
-                    .add(sedCreationType, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jLabel4)
+                    .add(removeOrKeepComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(18, 18, 18)
                 .add(jButton1)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -217,10 +241,21 @@ private void sedCreationTypeActionPerformed(java.awt.event.ActionEvent evt) {//G
 
 }//GEN-LAST:event_sedCreationTypeActionPerformed
 
+private void removeOrKeepComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeOrKeepComboBoxActionPerformed
+
+}//GEN-LAST:event_removeOrKeepComboBoxActionPerformed
+
     @Action
     public void load() {
         try {
-            Collection<Segment> segments = VizierImporter.getSedFromName(targetName, searchRadius);
+            int idx_duplicates = removeOrKeepComboBox.getSelectedIndex();
+            if (idx_duplicates == 0) {
+                remove = true;
+            } else {
+                remove = false;
+            }
+            
+            Collection<Segment> segments = VizierImporter.getSedFromName(targetName, searchRadius, remove);
             ExtSed selectedSed = manager.getSelected();
             
             int idx = sedCreationType.getSelectedIndex();
@@ -249,15 +284,18 @@ private void sedCreationTypeActionPerformed(java.awt.event.ActionEvent evt) {//G
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
+    private javax.swing.JComboBox removeOrKeepComboBox;
     private javax.swing.JComboBox sedCreationType;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
