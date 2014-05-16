@@ -27,13 +27,13 @@ import cfa.vo.sedlib.Point;
 import cfa.vo.sedlib.PositionParam;
 import cfa.vo.sedlib.Segment;
 import cfa.vo.sedlib.common.SedInconsistentException;
+import cfa.vo.sedlib.common.SedNoDataException;
 import cfa.vo.sedlib.common.Utypes;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Map;
 import uk.ac.starlink.table.StarTable;
@@ -82,133 +82,89 @@ public class VizierImporter {
             StarTable table = vob.makeStarTable(new URLDataSource(nedUrl), true, StoragePolicy.ADAPTIVE);
 
             Map<String, Segment> segMap = new HashMap();
-            
             Set<String> pointSet = new HashSet<String>();
             
-            if (remove == true) {
-                for (long i = 0; i < table.getRowCount(); i++) {
-                    Double ra = (Double) table.getCell(i, 0);
-                    Double dec = (Double) table.getCell(i, 1);
-                    //String coordString = ra.toString() + dec.toString();
+            for (long i = 0; i < table.getRowCount(); i++) {
+                
+                Double ra = (Double) table.getCell(i, 0);
+                Double dec = (Double) table.getCell(i, 1);
+                Double spectral = (Double) table.getCell(i, 4);
+                Double flux = ((Float) table.getCell(i, 5)).doubleValue();
+                Double err = ((Float) table.getCell(i, 6)).doubleValue();
+
+                // Remove duplicate points
+                if (remove == true) {
                     
-                    Double spectral = (Double) table.getCell(i, 4);
-                    Double flux = ((Float) table.getCell(i, 5)).doubleValue();
-                    Double err = ((Float) table.getCell(i, 6)).doubleValue();
-                    
+                    // making the segMap keys
                     String spectralString = String.format("%.4g", spectral);
                     String fluxString = String.format("%.4g", flux);
                     String errString = String.format("%.4g", err);
-                    
+
                     String points = spectralString+fluxString;
-                    
                     String coordString = points;
-                                        
+
+                    // If the same (spectral, flux) coordinate hasn't been added
+                    // to the segMap yet, add it.
                     if (!pointSet.contains(points)) {
-
-                        if (!segMap.containsKey(coordString)) {
-                            Segment s = new Segment();
-                            segMap.put(coordString, s);
-                            s.createData().createPoint();
-                            s.createChar().createSpectralAxis().setUnit("GHz");
-                            s.createChar().createSpectralAxis().setUcd("em.freq");
-                            s.createChar().createFluxAxis().setUnit("Jy");
-                            s.createChar().createFluxAxis().setUcd("phot.flux.density;em.freq");
-                            s.createChar().createFluxAxis().createAccuracy().createStatError().setUnit("Jy");
-                            s.createChar().createFluxAxis().createAccuracy().createStatError().setUcd("stat.error;phot.flux.density");
-                            s.createTarget().createName().setValue(targetName);
-                            PositionParam pp = new PositionParam();
-                            pp.setValue(new DoubleParam[]{new DoubleParam(ra), new DoubleParam(dec)});
-                            s.createTarget().setPos(pp);
-                            s.createCuration().createPublisher().setValue("Vizier - CDS");
-                        }
-
+                        
                         pointSet.add(points);
-                        System.out.println("Added a point. "+points);
+                        
+                        if (!segMap.containsKey(coordString)) {
+
+                            Segment s = new Segment();
+                            addSetupSegment(s, coordString, targetName, ra, dec);
+                            segMap.put(coordString, s);
+                        }
 
                         Segment s = segMap.get(coordString);
                         Point p = new Point();
                         p.createSpectralAxis().setValue(new DoubleParam(spectral));
                         p.createFluxAxis().setValue(new DoubleParam(flux));
                         p.createFluxAxis().createAccuracy().setStatError(new DoubleParam(err));
-                        s.createData().createPoint().add(p);
-                        Field xf = new Field();
-                        xf.setUcd("em.freq");
-                        xf.setUnit("GHz");
-                        s.createData().setDataInfo(xf, "Spectrum.Data.SpectralAxis.Value");
-                        Field yf = new Field();
-                        yf.setUcd("phot.flux.density;em.freq");
-                        yf.setUnit("Jy");
-                        s.createData().setDataInfo(yf, "Spectrum.Data.FluxAxis.Value");
-                        Field ef = new Field();
-                        ef.setUcd("stat.error;phot.flux.density");
-                        ef.setUnit("Jy");
-                        s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
+                        addPoint(s, p);
 
+                    /* else, if the (spec, flux) coordinate is in the segment,
+                         * then check its flux error. If the previous point's                    
+                         * flux error is NaN or 0.0, then replace the error with
+                         * the error of the new point. 
+                         */
                     } else {
-                        if (!Double.isNaN(err) && err != 0.0) {
-                            Segment s = segMap.get(coordString);
-                            double[] lerr = new double[1];
-                            lerr[0] = err;
-                            double[] oldErr = null;
-                            try {
-                                oldErr = (double[])s.getDataValues(Utypes.SEG_DATA_FLUXAXIS_ACC_STATERR);
-                                System.out.println("OldErr: "+oldErr[0]);
-                            } catch (SedInconsistentException ex) {
-                                System.err.println(ex.toString());
-                            }
-                            if (Double.isNaN(oldErr[0]) || oldErr[0] == 0.0) {
+                        Segment s = segMap.get(coordString);
+                        double[] lerr = new double[1];
+                        lerr[0] = err;
+                        double[] oldErr = null;
+                        try {
+                            oldErr = (double[])s.getDataValues(Utypes.SEG_DATA_FLUXAXIS_ACC_STATERR);
+                        } catch (SedInconsistentException ex) {
+                            System.err.println(ex.toString());
+                        }
+                        if (Double.isNaN(oldErr[0]) || oldErr[0] == 0.0) {
+                            if (!Double.isNaN(err) && err != 0.0) {
                                 s.setDataValues(lerr, Utypes.SEG_DATA_FLUXAXIS_ACC_STATERR);
-                                System.out.println("New error: "+err);
                             }
                         }
                     }
-                }
-            } else {
-                for (long i = 0; i < table.getRowCount(); i++) {
-                    Double ra = (Double) table.getCell(i, 0);
-                    Double dec = (Double) table.getCell(i, 1);
-                    //String coordString = ra.toString() + dec.toString();
-                    String coordString = (String) table.getCell(i, 2);
                     
-                    if (!segMap.containsKey(coordString)) {
-                        Segment s = new Segment();
-                        segMap.put(coordString, s);
-                        s.createData().createPoint();
-                        s.createChar().createSpectralAxis().setUnit("GHz");
-                        s.createChar().createSpectralAxis().setUcd("em.freq");
-                        s.createChar().createFluxAxis().setUnit("Jy");
-                        s.createChar().createFluxAxis().setUcd("phot.flux.density;em.freq");
-                        s.createChar().createFluxAxis().createAccuracy().createStatError().setUnit("Jy");
-                        s.createChar().createFluxAxis().createAccuracy().createStatError().setUcd("stat.error;phot.flux.density");
-                        s.createTarget().createName().setValue(targetName);
-                        PositionParam pp = new PositionParam();
-                        pp.setValue(new DoubleParam[]{new DoubleParam(ra), new DoubleParam(dec)});
-                        s.createTarget().setPos(pp);
-                        s.createCuration().createPublisher().setValue("Vizier - CDS");
-                    }
+                /* If we're not removing duplicate points, then just add all the
+                     * points to the segMap.
+                     * 
+                     */
+                } else {
+                        String coordString = ra.toString() + dec.toString();
+                        //String coordString = (String) table.getCell(i, 2);
 
-                    Double spectral = (Double) table.getCell(i, 4);
-                    Double flux = ((Float) table.getCell(i, 5)).doubleValue();
-                    Double err = ((Float) table.getCell(i, 6)).doubleValue();
+                        if (!segMap.containsKey(coordString)) {     
+                            Segment s = new Segment();
+                            addSetupSegment(s, coordString, targetName, ra, dec);
+                            segMap.put(coordString, s);
+                        }
 
-                    Segment s = segMap.get(coordString);
-                    Point p = new Point();
-                    p.createSpectralAxis().setValue(new DoubleParam(spectral));
-                    p.createFluxAxis().setValue(new DoubleParam(flux));
-                    p.createFluxAxis().createAccuracy().setStatError(new DoubleParam(err));
-                    s.createData().createPoint().add(p);
-                    Field xf = new Field();
-                    xf.setUcd("em.freq");
-                    xf.setUnit("GHz");
-                    s.createData().setDataInfo(xf, "Spectrum.Data.SpectralAxis.Value");
-                    Field yf = new Field();
-                    yf.setUcd("phot.flux.density;em.freq");
-                    yf.setUnit("Jy");
-                    s.createData().setDataInfo(yf, "Spectrum.Data.FluxAxis.Value");
-                    Field ef = new Field();
-                    ef.setUcd("stat.error;phot.flux.density");
-                    ef.setUnit("Jy");
-                    s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
+                        Segment s = segMap.get(coordString);
+                        Point p = new Point();
+                        p.createSpectralAxis().setValue(new DoubleParam(spectral));
+                        p.createFluxAxis().setValue(new DoubleParam(flux));
+                        p.createFluxAxis().createAccuracy().setStatError(new DoubleParam(err));
+                        addPoint(s, p);
                 }
             }
             return segMap.values();
@@ -216,6 +172,37 @@ public class VizierImporter {
          catch (Exception ex) {
             throw new SegmentImporterException(ex);
          }
+    }
+    
+    private static void addSetupSegment(Segment s, String coordString, String targetName, Double ra, Double dec) {
+        s.createData().createPoint();
+        s.createChar().createSpectralAxis().setUnit("GHz");
+        s.createChar().createSpectralAxis().setUcd("em.freq");
+        s.createChar().createFluxAxis().setUnit("Jy");
+        s.createChar().createFluxAxis().setUcd("phot.flux.density;em.freq");
+        s.createChar().createFluxAxis().createAccuracy().createStatError().setUnit("Jy");
+        s.createChar().createFluxAxis().createAccuracy().createStatError().setUcd("stat.error;phot.flux.density");
+        s.createTarget().createName().setValue(targetName);
+        PositionParam pp = new PositionParam();
+        pp.setValue(new DoubleParam[]{new DoubleParam(ra), new DoubleParam(dec)});
+        s.createTarget().setPos(pp);
+        s.createCuration().createPublisher().setValue("Vizier - CDS");
+    }
+    
+    private static void addPoint(Segment s, Point p) throws SedInconsistentException, SedNoDataException {
+        s.createData().createPoint().add(p);
+        Field xf = new Field();
+        xf.setUcd("em.freq");
+        xf.setUnit("GHz");
+        s.createData().setDataInfo(xf, "Spectrum.Data.SpectralAxis.Value");
+        Field yf = new Field();
+        yf.setUcd("phot.flux.density;em.freq");
+        yf.setUnit("Jy");
+        s.createData().setDataInfo(yf, "Spectrum.Data.FluxAxis.Value");
+        Field ef = new Field();
+        ef.setUcd("stat.error;phot.flux.density");
+        ef.setUnit("Jy");
+        s.createData().setDataInfo(ef, "Spectrum.Data.FluxAxis.Accuracy.StatError");
     }
 }
         
