@@ -12,9 +12,26 @@ import cfa.vo.iris.IWorkspace;
 import cfa.vo.iris.IrisApplication;
 import cfa.vo.iris.IrisComponent;
 import cfa.vo.iris.NullCommandLineInterface;
+import cfa.vo.iris.sed.ExtSed;
+import cfa.vo.iris.sed.SedlibSedManager;
+import cfa.vo.sed.builder.SedBuilder;
+import cfa.vo.sed.gui.SampChooser;
+import cfa.vo.sedlib.Sed;
+import cfa.vo.sedlib.Segment;
+import cfa.vo.sedlib.io.SedFormat;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JInternalFrame;
+import org.astrogrid.samp.Message;
+import org.astrogrid.samp.client.AbstractMessageHandler;
+import org.astrogrid.samp.client.HubConnection;
 import org.astrogrid.samp.client.MessageHandler;
 
 /**
@@ -25,6 +42,9 @@ public class VizierClient implements IrisComponent {
 
     private IrisApplication app;
     private IWorkspace workspace;
+	private static IWorkspace workspce;
+	private static IrisApplication iris;
+	private static SedlibSedManager sedManager;
 
     @Override
     public void init(IrisApplication app, IWorkspace workspace) {
@@ -59,7 +79,10 @@ public class VizierClient implements IrisComponent {
 
     @Override
     public List<MessageHandler> getSampHandlers() {
-        return new ArrayList();
+		List<MessageHandler> list = new ArrayList();
+        list.add(new VizierSAMPHandler());
+
+        return list;
     }
 
     @Override
@@ -86,5 +109,51 @@ public class VizierClient implements IrisComponent {
             });
         }
     }
+	
+	private static class VizierSAMPHandler extends AbstractMessageHandler {
+
+        public VizierSAMPHandler() {
+            super(new String[]{"table.load.votable",
+                        "table.load.fits",});
+        }
+
+        @Override
+        public Map processCall(HubConnection hc, String senderId, Message msg) throws MalformedURLException {
+            senderId = iris.getSAMPController().getClientMap().get(senderId).toString();
+            String formatName = msg.getMType().toLowerCase().equals("table.load.votable") ? "VOT" : "FITS";
+            String tableName = (String) msg.getParam("name");
+            if (tableName == null || tableName.isEmpty()) {
+                tableName = (String) msg.getParam("table-id");
+            }
+			ExtSed sed = sedManager.getSelected() != null ? sedManager.getSelected() : sedManager.newSed("Vizier");
+			/**
+			try {
+				Collection<Segment> segments = VizierImporter.getSedFromSAMP(msg);
+				List<Segment> segs = new ArrayList(segments);
+				sed.addSegment(segs);
+			} catch (Exception ex) {
+				URL url = new URL((String) msg.getParam("url"));
+				Logger.getLogger(SedBuilder.class.getName()).log(Level.SEVERE, null, ex);
+				return doImport(tableName, senderId, url, formatName, sed);
+			}
+			**/
+			try {
+				Collection<Segment> segments = VizierImporter.getSedFromSAMP(msg);
+				List<Segment> segs = new ArrayList(segments);
+				sed.addSegment(segs);
+			} catch (Exception ex) {
+				Logger.getLogger(SedBuilder.class.getName()).log(Level.SEVERE, "shithappened and it aint good");
+			}
+			
+			return null;
+		}
+		
+		 private Map doImport(String tableId, String senderId, URL url, String formatName, ExtSed sed) {
+            SampChooser chooser = new SampChooser(tableId, senderId, url, formatName, sed, workspce);
+            workspce.addFrame(chooser);
+            chooser.setVisible(true);
+            return null;
+        }
+	}
 
 }
