@@ -14,9 +14,12 @@ cache:
 install: true
 
 before_install:
-  - export PATH=$HOME/miniconda/bin:$PATH
+  - export MINICONDA=/home/travis/miniconda
   - command -v conda >/dev/null || { wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
      bash miniconda.sh -b -f; }
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b -p $MINICONDA
+  - export PATH=$MINICONDA/bin:$PATH
   - conda update --yes conda
   - conda install --yes python=$TRAVIS_PYTHON_VERSION astropy=0.4.4 scipy
   - conda install --yes -c https://conda.anaconda.org/sherpa sherpa
@@ -32,3 +35,7 @@ script: mvn -U verify
 
 # This runs with instrumentation
 after_success: mvn -Pjacoco clean verify coveralls:report
+
+# This runs if a test fails
+after_failure:
+  - cat target/surefire-reports/*.txt 
