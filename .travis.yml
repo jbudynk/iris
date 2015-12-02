@@ -32,3 +32,7 @@ script: mvn -U verify
 
 # This runs with instrumentation
 after_success: mvn -Pjacoco clean verify coveralls:report
+
+# This runs if a test fails
+after_failure:
+  - cat target/surefire-reports/*.txt 
