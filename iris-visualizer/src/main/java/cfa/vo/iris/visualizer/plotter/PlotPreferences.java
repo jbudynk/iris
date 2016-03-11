@@ -80,6 +80,18 @@ public class PlotPreferences {
         return preferences;
     }
     
+    public PlotPreferences setPreferences(Map<String, Object> preferences) {
+        this.preferences = preferences;
+        return this;
+    }
+    
+    public PlotPreferences setPreferences(PlotPreferences preferences) {
+        for (String pref : preferences.getPreferences().keySet()) {
+            this.preferences.put(pref, preferences.getPreferences().get(pref));
+        }
+        return this;
+    }
+    
     public PlotPreferences setShowGrid(boolean arg1) {
         this.preferences.put(GRID, arg1);
         return this;

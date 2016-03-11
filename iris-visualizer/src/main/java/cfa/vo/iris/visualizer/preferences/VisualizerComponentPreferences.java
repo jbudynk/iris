@@ -82,7 +82,21 @@ public class VisualizerComponentPreferences {
      *  Top level plot preferences for the stil plotter.
      */
     public PlotPreferences getPlotPreferences() {
+        if (this.ws.getSedManager().getSelected() != null) {
+            return getSelectedSedPreferences().getPlotPreferences();
+        }
         return plotPreferences;
+    }
+    
+    /**
+     * @param plotPreferences
+     */
+    public void setPlotPreferences(PlotPreferences plotPreferences) {
+        if (this.ws.getSedManager().getSelected() != null) {
+            this.getSelectedSedPreferences().getPlotPreferences().setPreferences(plotPreferences);
+        }
+        this.plotPreferences = plotPreferences;
+        
     }
 
     /**

@@ -354,7 +354,7 @@ public class StilPlotter extends JPanel {
         // Y-label from falling off the jpanel. Conversely, don't set "insets"
         // and let the plotter dynamically change size to keep axes labels
         // on the plot.
-
+        
         // Add high level plot preferences
         PlotPreferences pp = preferences.getPlotPreferences();
         for (String key : pp.getPreferences().keySet()) {

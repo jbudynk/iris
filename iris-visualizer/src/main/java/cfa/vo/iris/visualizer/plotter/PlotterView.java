@@ -92,7 +92,7 @@ public class PlotterView extends JInternalFrame {
         stilPlotter1.setWorkSpace(ws);
         stilPlotter1.setSedManager((SedlibSedManager) ws.getSedManager());
         stilPlotter1.setVisualizerPreferences(preferences);
-        this.plotter = stilPlotter1; //new StilPlotter(ws, preferences);
+        this.plotter = stilPlotter1;
         this.plotter.reset(null, true);
         
         // Action for opening metadata browser
@@ -155,7 +155,7 @@ public class PlotterView extends JInternalFrame {
         mntmGridOnOff.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean on = !PlotterView.this.preferences.getPlotPreferences().getShowGrid();
+                boolean on = !PlotterView.this.plotter.getVisualizerPreferences().getSelectedSedPreferences().getPlotPreferences().getShowGrid();
                 mntmGridOnOff.setSelected(on);
                 setGridOn(on);
             }
@@ -166,7 +166,7 @@ public class PlotterView extends JInternalFrame {
         mntmAutoFixed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean fixed = !PlotterView.this.preferences.getPlotPreferences().getFixed();
+                boolean fixed = !PlotterView.this.plotter.getVisualizerPreferences().getSelectedSedPreferences().getPlotPreferences().getFixed();
                 setFixedViewPort(fixed);
             }
         });
@@ -218,6 +218,7 @@ public class PlotterView extends JInternalFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         plotTypeButtonGroup = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
@@ -367,6 +368,8 @@ public class PlotterView extends JInternalFrame {
                 .addContainerGap())
         );
 
+        menuBar.setName("menuBar"); // NOI18N
+
         mnF.setText("File");
 
         mntmExport.setText("Export");
@@ -398,7 +401,6 @@ public class PlotterView extends JInternalFrame {
         mnPlotType.setText("Plot Type");
 
         plotTypeButtonGroup.add(mntmLog);
-        mntmLog.setSelected(true);
         mntmLog.setText("Log");
         mnPlotType.add(mntmLog);
 
@@ -424,8 +426,12 @@ public class PlotterView extends JInternalFrame {
         mntmAutoFixed.setText("Auto/Fixed");
         jMenu1.add(mntmAutoFixed);
 
-        mntmGridOnOff.setSelected(true);
         mntmGridOnOff.setText("Grid on/off");
+        mntmGridOnOff.setName(""); // NOI18N
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, stilPlotter1, org.jdesktop.beansbinding.ELProperty.create("${visualizerPreferences.selectedSedPreferences.plotPreferences.showGrid}"), mntmGridOnOff, org.jdesktop.beansbinding.BeanProperty.create("selected"));
+        bindingGroup.addBinding(binding);
+
         jMenu1.add(mntmGridOnOff);
 
         mntmCoplot.setText("Coplot...");
@@ -457,6 +463,8 @@ public class PlotterView extends JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
+
+        bindingGroup.bind();
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -501,6 +509,7 @@ public class PlotterView extends JInternalFrame {
     private cfa.vo.iris.gui.JButtonArrow up;
     private javax.swing.JButton zoomIn;
     private javax.swing.JButton zoomOut;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     private void makeLinear() {
