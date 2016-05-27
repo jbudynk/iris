@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import uk.ac.starlink.table.ColumnInfo;
 import uk.ac.starlink.table.StarTable;
 
 /**
@@ -50,11 +51,13 @@ public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
         PARAMETERS.add(OR);
     }
     
-    private FilterDoubleExpressionValidator filterEvaluator;
+    private FilterDoubleExpressionValidator doubleFilterExpressionValidator;
+    private FilterStringExpressionValidator stringFilterExpressionValidator;
     
-    public LogicalSetEvaluator(StarTable table) {
+    public LogicalSetEvaluator(StarTable table, String expression) {
         super(PARAMETERS);
-        this.filterEvaluator = new FilterDoubleExpressionValidator(table);
+        this.doubleFilterExpressionValidator = new FilterDoubleExpressionValidator(table, expression);
+        this.stringFilterExpressionValidator = new FilterStringExpressionValidator(table, expression);
     }
 
     /**
@@ -64,8 +67,15 @@ public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
      */
     @Override
     protected HashSet<Integer> toValue(String expression, Object o) {
-
-        List<Integer> iRows = filterEvaluator.process(expression);
+        List<Integer> iRows;
+        // has string-valued columns
+        if (hasStringColumns(expression)) {
+            iRows = stringFilterExpressionValidator.process(expression);
+        } else {
+        // has double-valued columns
+            iRows = doubleFilterExpressionValidator.process(expression);
+        }
+        
         HashSet<Integer> setRows = new HashSet<>();
         setRows.addAll(iRows);
         return setRows;
@@ -126,5 +136,20 @@ public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
         } else {
             return null;
         }
+    }
+    
+    // check if expression has string-valued columns.
+    private boolean hasStringColumns(String expression) {
+        List<String> columns = ColumnMapper.findColumnSpecifiers(expression);
+        for (String column : columns) {
+            ColumnInfo info = doubleFilterExpressionValidator.starTable
+                    .getColumnInfo(Integer.valueOf(column));
+            if (info.getContentClass().equals(String.class)) {
+                return true;
+            }
+        }
+        
+        // no strings found in expression
+        return false;
     }
 }

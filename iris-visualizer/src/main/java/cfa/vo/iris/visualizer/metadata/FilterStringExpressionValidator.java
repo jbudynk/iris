@@ -24,39 +24,43 @@ import uk.ac.starlink.table.StarTable;
 
 /**
  *
- * A class that validates an input filter expression for numeric data.
+ * A class that validates an input filter expression for strings.
  */
-public class FilterDoubleExpressionValidator {
+public class FilterStringExpressionValidator {
+    StarTable starTable; // the stacked startable to filter
+    StringEvaluator stringEvaluator; // evaluator for string expressions
+    String expression; // filter expression
     
-    StarTable starTable; // the StarTable to filter
-    ComparisonDoubleEvaluator doubleEvaluator; // evaluator for numeric columns
-    ColumnMapper columnMapper;
-    private String expression;
-    
-    public FilterDoubleExpressionValidator(StarTable table, String expression) {
+    public FilterStringExpressionValidator(StarTable table) {
         this.starTable = table;
-        this.doubleEvaluator = new ComparisonDoubleEvaluator();
+        this.expression = "";
+        this.stringEvaluator = new StringEvaluator();
+    }
+    
+    public FilterStringExpressionValidator(StarTable table, String expression) {
+        this.starTable = table;
         this.expression = expression;
-        this.columnMapper = new ColumnMapper<Double>(starTable, expression);
+        this.stringEvaluator = new StringEvaluator();
     }
     
     /**
      * Find all rows the in the StarTable that comply with the filter
      * expression.
+     * 
      * @return the array of row indices that comply with the filter expression. 
      * 
-     * @throws IllegalArgumentException if the expression is invalid.
+     * @throws cfa.vo.iris.visualizer.metadata.FilterExpressionException if the 
+     *         expression is invalid.
      */
-    public List<Integer> process() throws IllegalArgumentException {
-        
+    public List<Integer> process() throws FilterExpressionException {
         return process(expression);
     }
     
     /**
-     * Find all rows the in the IrisStarJTable that comply with the given filter
+     * Find all rows the in the StarTable that comply with the given filter
      * expression.
      * 
-     * @param expression the expression to evaluate
+     * @param expression
      * @return the array of row indices that comply with the filter expression. 
      * 
      * @throws IllegalArgumentException if the expression is invalid.
@@ -71,17 +75,18 @@ public class FilterDoubleExpressionValidator {
             throw new IllegalArgumentException(FilterExpressionException.DEFAULT_MSG);
         }
         
-        ColumnMapper<Double> mapper = new ColumnMapper<>(starTable, expression);
+        // get column specifiers
+        ColumnMapper<String> mapper = new ColumnMapper<>(starTable, expression);
         
         // list to hold evaluated expressions
-        List<Double> evaluatedExpression = new ArrayList<>();
+        List<String> evaluatedExpression = new ArrayList<>();
         
-        // Evaluate the expression for each row in the IrisStarJTable.
+        // Evaluate the expression for each row in the StarTable.
         for (int i=0; i<this.starTable.getRowCount(); i++) {
             
             // evaluate the expression
             try {
-                evaluatedExpression.add((Double) mapper.evaluateRow(starTable.getRow(i), Double.class));
+                evaluatedExpression.add((String) mapper.evaluateRow(starTable.getRow(i), String.class));
             } catch (IOException ex) {
                 Logger.getLogger(FilterDoubleExpressionValidator.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -91,32 +96,16 @@ public class FilterDoubleExpressionValidator {
         return getFilteredIndices(evaluatedExpression);
     }
     
-    private List<Integer> getFilteredIndices(List<Double> evaluatedExpression) {
-        // TODO: come up with more efficient way of getting non-null indices.
+    private List<Integer> getFilteredIndices(List<String> evaluatedExpression) {
+        // TODO: come up with more efficient way of getting indices.
         
         // get non-null indices from evaluatedExpression list
         List<Integer> indices = new ArrayList<>();
         for (int i=0; i<evaluatedExpression.size(); i++) {
-            Double val = evaluatedExpression.get(i);
-            if (!val.equals(Double.NaN))
+            String val = evaluatedExpression.get(i);
+            if (val.equals(StringEvaluator.YES))
                 indices.add(i);
         }
         return indices;
-    }
-
-    /**
-     * Get the filter expression.
-     * @return the filter expression.
-     */
-    public String getExpression() {
-        return expression;
-    }
-
-    /**
-     * Set the filter expression.
-     * @param expression a filter expression
-     */
-    public void setExpression(String expression) {
-        this.expression = expression;
     }
 }

@@ -15,6 +15,7 @@
  */
 package cfa.vo.iris.visualizer.metadata;
 
+import com.fathzer.soft.javaluator.AbstractEvaluator;
 import com.fathzer.soft.javaluator.StaticVariableSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +29,22 @@ import uk.ac.starlink.table.StarTable;
  * A class which maps column specifiers in a filter expression to columns in a 
  * StarTable, and evaluates each StarTable row with the expression. 
  */
-public class ColumnMapper {
+public class ColumnMapper<T> {
 
     private StarTable table;
-    private List<Integer> columnIndexes;
+    private List<String> columns;
     private String expression;
+    
+    // evaluators
     private ComparisonDoubleEvaluator doubleEvaluator;
+    private StringEvaluator stringEvaluator;
 
     public ColumnMapper(StarTable table, String expression) {
        this.expression = expression;
        this.table = table;
        this.doubleEvaluator = new ComparisonDoubleEvaluator();
+       this.stringEvaluator = new StringEvaluator();
+       this.columns = findColumnSpecifiers(expression);
     }
 
     /**
@@ -49,11 +55,9 @@ public class ColumnMapper {
      * expression are invalid (e.g., do not exist, contain non-numeric values), 
      * or if the expression is malformed (mismatched parentheses).
      */
-    public Double evaluateRow(Object[] tableRow) throws IllegalArgumentException {
+    public Object evaluateRow(Object[] tableRow, Class<T> type) throws IllegalArgumentException {
 
-        Double evaluatedExpression;
-        List<String> columns = findColumnSpecifiers(expression);
-        StaticVariableSet<Double> variables = new StaticVariableSet<>();
+        StaticVariableSet<T> variables = new StaticVariableSet<>();
 
         // Get the specified column values. The values are added to the 
         // StaticVariableSet for the evaluator.
@@ -62,23 +66,29 @@ public class ColumnMapper {
             // right now, only numbered column specifiers are allowed.
             // TODO: generalize this for string-valued column specifiers
             try {
-                variables.set("$"+column, (Double) tableRow[Integer.valueOf(column)]);
+                variables.set("$"+column, (T) tableRow[Integer.valueOf(column)]);
             } catch (NumberFormatException ex) {
                 throw new IllegalArgumentException(FilterExpressionException.NON_NUMERIC_COLUMN_NAME_MSG);
             } catch (NoSuchElementException ex) {
                 throw new NoSuchElementException("Bad expression: "
                 + "Specified column $"+column+" does not exist.");
-            } catch (ClassCastException ex) {
-                throw new IllegalArgumentException(FilterExpressionException.STRING_COLUMN_MSG);
             }
         }
 
         // evaluate the expression
-        evaluatedExpression = doubleEvaluator.evaluate(expression, variables);
-
-        return evaluatedExpression;
+        if (type.equals(String.class)) {
+            return stringEvaluator.evaluate(expression, variables);
+        } else if (type.equals(Double.class)) {
+            try {
+                return doubleEvaluator.evaluate(expression, variables);
+            } catch (ClassCastException ex) {
+                throw new IllegalArgumentException(FilterExpressionException.STRING_COLUMN_MSG);
+            }
+        } else {
+            throw new IllegalArgumentException("Class type must be String or Double.");
+        }
     }
-
+    
     /**
      * Finds all the column specifiers in the expression. Columns are
      * denoted by the prefix "$".

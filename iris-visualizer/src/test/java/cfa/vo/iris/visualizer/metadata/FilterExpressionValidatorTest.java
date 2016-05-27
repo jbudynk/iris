@@ -55,7 +55,7 @@ public class FilterExpressionValidatorTest {
         starTable = adapter.convertSegment(seg);
         
         // filter validator
-        validator = new FilterDoubleExpressionValidator(starTable);
+        validator = new FilterDoubleExpressionValidator(starTable, "");
     }
 
     @Test
@@ -65,37 +65,43 @@ public class FilterExpressionValidatorTest {
         
         // get all the points whose value is equal to 5
         expression = "$1 == 5";
+        validator.setExpression(expression);
         
         // the evaluator returns the array of rows whose data complies
         // with the filter expression
         
         assertArrayEquals(new Integer[]{4}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[1]));
+                (Integer[]) validator.process().toArray(new Integer[1]));
         
         // get all points whose value is not equal to 5
         expression = "$1 != 5";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[9]));
+                (Integer[]) validator.process().toArray(new Integer[9]));
         
         // get all points whose value is less than 5
         expression = "$1 < 5";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[4]));
+                (Integer[]) validator.process().toArray(new Integer[4]));
         
         // get all points whose value is greater than 5
         expression = "$1 > 5";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[6]));
+                (Integer[]) validator.process().toArray(new Integer[6]));
         
         // get all points whose value is less than or equal to 5
         expression = "$1 <= 5";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 4}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[5]));
+                (Integer[]) validator.process().toArray(new Integer[5]));
         
         // get all points whose value is greater than or equal to 5
         expression = "$1 >= 5";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[7]));
+                (Integer[]) validator.process().toArray(new Integer[7]));
         
     }
     
@@ -105,16 +111,18 @@ public class FilterExpressionValidatorTest {
         
         // get all the points whose value is < 6
         expression = "$1 + 2 < 6";
+        validator.setExpression(expression);
         
         // the evaluator returns the array of rows whose data complies
         // with the filter expression
         assertArrayEquals(new Integer[]{0, 1, 2}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[3]));
+                (Integer[]) validator.process().toArray(new Integer[3]));
         
         // get all the points whose value is greater than or equal to 10
         expression = "$2*3 -6 >= 10 - 1";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[7]));
+                (Integer[]) validator.process().toArray(new Integer[7]));
         
         //
         // test comparing values in different columns
@@ -122,29 +130,35 @@ public class FilterExpressionValidatorTest {
         
         // should give all matching rows since $1 and $2 are equal
         expression = "$1 == $2";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[11]));
+                (Integer[]) validator.process().toArray(new Integer[11]));
         
         expression = "$2 *2 !=$1";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[11]));
+                (Integer[]) validator.process().toArray(new Integer[11]));
         
         expression = "$2 != $1";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[0]));
+                (Integer[]) validator.process().toArray(new Integer[0]));
         
         expression = "$1 *4 < $2+10";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[3]));
+                (Integer[]) validator.process().toArray(new Integer[3]));
         
         expression = "$1 *4 > $2/2 + 10";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{2, 3, 4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[9]));
+                (Integer[]) validator.process().toArray(new Integer[9]));
         
         // two columns specified on one side of the comparison
         expression = "$1 + $2*2 == $2*3";
+        validator.setExpression(expression);
         assertArrayEquals(new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 
-                (Integer[]) validator.process(expression).toArray(new Integer[11]));
+                (Integer[]) validator.process().toArray(new Integer[11]));
         
     }
     
@@ -156,15 +170,16 @@ public class FilterExpressionValidatorTest {
         ExtSed sed = ExtSed.read(TestData.class.getResource("3c273.vot").openStream(), SedFormat.VOT);
         IrisStarTable table = adapter.convertSegment(sed.getSegment(0));
         
-        // an exception should be thrown if a column has string values.
+        // an exception should be thrown if a comparison expression has a 
+        // column with string values
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Only numeric columns may be filtered at this time.");
+        exception.expectMessage(FilterExpressionException.STRING_COLUMN_MSG);
         
         expression = "$1 + 2 < 6";
         
         // the 1st column has string values
-        FilterDoubleExpressionValidator newValidator = new FilterDoubleExpressionValidator(table.getSegmentMetadataTable());
-        newValidator.process(expression);
+        FilterDoubleExpressionValidator newValidator = new FilterDoubleExpressionValidator(table.getSegmentMetadataTable(), expression);
+        newValidator.process();
     }
     
     @Test
@@ -203,54 +218,60 @@ public class FilterExpressionValidatorTest {
         
         // empty expression. Should throw IllegalArgumentException.
         String expression = "";
+        validator.setExpression(expression);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage(FilterExpressionException.EMPTY_EXPRESSION_MSG);
-        validator.process(expression);
+        validator.process();
     }
     @Test
     public void testInvalidExpressionNoColumnSpecifiers() throws Exception {
         // if no column specifier is in the expression, raise a warning
         String expression = "1 * 5";
+        validator.setExpression(expression);
         // "must specify a column"
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage(FilterExpressionException.DEFAULT_MSG);
-        validator.process(expression);
+        validator.process();
     }
     
     @Test
     public void testInvalidExpressionColumnDNE1() throws Exception {
         // column specified does not exist
         String expression = "$5 * 2 > $1";
+        validator.setExpression(expression);
         exception.expect(ArrayIndexOutOfBoundsException.class);
         exception.expectMessage(FilterExpressionException.COLUMN_DNE_MSG);
-        validator.process(expression);
+        validator.process();
     }
     
     @Test
     public void testInvalidExpressionColumnDNE2() throws Exception {
         // column specified does not exist
         String expression = "$whats_good * 2 > 1";
+        validator.setExpression(expression);
         exception.expect(IllegalArgumentException.class);
         // TODO: change exception message to COLUMN_DNE_MSG when string
         // column specifiers are implemented.
         exception.expectMessage(FilterExpressionException.NON_NUMERIC_COLUMN_NAME_MSG);
-        validator.process(expression);
+        validator.process();
     }
     @Test
     public void testInvalidExpressionBadParentheses() throws Exception {
         // badly placed parenthesis
         String expression = "($1 * 2)/ 3) > 5";
+        validator.setExpression(expression);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Parentheses mismatched");
-        validator.process(expression);
+        validator.process();
     }
     
     @Test
     public void testInvalidExpressionNonsense() throws Exception {
         // badly placed parenthesis
         String expression = "< asdkurb";
+        validator.setExpression(expression);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage(FilterExpressionException.DEFAULT_MSG);
-        validator.process(expression);
+        validator.process();
     }
 }

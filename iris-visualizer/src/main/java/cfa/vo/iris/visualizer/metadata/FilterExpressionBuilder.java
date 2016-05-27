@@ -28,9 +28,20 @@ import uk.ac.starlink.table.StarTable;
 public class FilterExpressionBuilder {
     
     private LogicalSetEvaluator filterEvaluator;
+    private String expression;
     
     public FilterExpressionBuilder(StarTable table) {
-        this.filterEvaluator = new LogicalSetEvaluator(table);
+        this.expression = "";
+        this.filterEvaluator = new LogicalSetEvaluator(table, expression);
+    }
+    
+    public FilterExpressionBuilder(StarTable table, String expression) {
+        this.expression = expression;
+        this.filterEvaluator = new LogicalSetEvaluator(table, expression);
+    }
+    
+    public List<Integer> process() {
+        return process(expression);
     }
     
     public List<Integer> process(String expression) {
@@ -38,28 +49,4 @@ public class FilterExpressionBuilder {
         
         return new ArrayList<>(hashSetRows);
     }
-    
-//    public TreeNode createTreeNode() {
-//        Iterator<Character>itr = postOrder.iterator();
-//        Tree tree = new Tree();
-//        NodeStack nodeStack = new NodeStack();
-//        Tree.TreeNode node;
-//        while (itr.hasNext()) {
-//            Character c = itr.next();
-//            if(!isDigit(c)){
-//                node = tree.createNode(c);
-//                node.right = nodeStack.pop();
-//                node.left = nodeStack.pop();
-//                nodeStack.push(node);
-//            }else{
-//                node = tree.createNode(c);
-//                nodeStack.push(node);
-//            }
-//        }
-//        node = nodeStack.pop();
-//        return node;
-//    }
-
-
-    
 }
