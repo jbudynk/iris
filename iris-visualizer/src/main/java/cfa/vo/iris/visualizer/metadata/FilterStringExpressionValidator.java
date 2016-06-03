@@ -108,4 +108,12 @@ public class FilterStringExpressionValidator {
         }
         return indices;
     }
+    
+    public void setStarTable(StarTable table) {
+        this.starTable = table;
+    }
+    
+    public StarTable getStarTable() {
+        return this.starTable;
+    }
 }

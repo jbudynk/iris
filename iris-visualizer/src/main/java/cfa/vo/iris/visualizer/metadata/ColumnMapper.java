@@ -15,8 +15,9 @@
  */
 package cfa.vo.iris.visualizer.metadata;
 
-import com.fathzer.soft.javaluator.AbstractEvaluator;
-import com.fathzer.soft.javaluator.StaticVariableSet;
+//import com.fathzer.soft.javaluator.AbstractEvaluator;
+//import com.fathzer.soft.javaluator.StaticVariableSet;
+import cfa.vo.iris.visualizer.metadata.javaluator.StaticVariableSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;

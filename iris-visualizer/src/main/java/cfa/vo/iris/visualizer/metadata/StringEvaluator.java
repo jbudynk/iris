@@ -25,6 +25,7 @@ import cfa.vo.iris.visualizer.metadata.javaluator.BracketPair;
 import cfa.vo.iris.visualizer.metadata.javaluator.Constant;
 import cfa.vo.iris.visualizer.metadata.javaluator.Operator;
 import cfa.vo.iris.visualizer.metadata.javaluator.Parameters;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -42,13 +43,13 @@ public class StringEvaluator extends AbstractEvaluator<String> {
     public final static Operator NOT = new Operator("!", 1, Operator.Associativity.RIGHT, 1);
     public final static Operator CONTAINS = new Operator("contains", 2, Operator.Associativity.LEFT, 0);
     public final static Operator IS_EMPTY = new Operator("isEmpty", 1, Operator.Associativity.RIGHT, 0);
-    public final static Operator EQUALS = new Operator("isEqual", 2, Operator.Associativity.LEFT, 0);
+    public final static Operator EQUALS = new Operator("equals", 2, Operator.Associativity.LEFT, 0);
     public final static Operator BEGINS_WITH = new Operator("beginsWith", 2, Operator.Associativity.LEFT, 0);
     public final static Operator ENDS_WITH = new Operator("endsWith", 2, Operator.Associativity.LEFT, 0);
     
     // string identifiers
-    public final static BracketPair DOUBLE_QUOTES = new BracketPair('\'', '\'');
-    public final static BracketPair SINGLE_QUOTES = new BracketPair('\"', '\"');
+    public final static BracketPair DOUBLE_QUOTES = new BracketPair('\"', '\"');
+    public final static BracketPair SINGLE_QUOTES = new BracketPair('\'', '\'');
     
     private static final Parameters PARAMETERS;
     
@@ -58,6 +59,7 @@ public class StringEvaluator extends AbstractEvaluator<String> {
         PARAMETERS.add(IS_EMPTY); // is empty
         PARAMETERS.add(BEGINS_WITH); // begins with
         PARAMETERS.add(ENDS_WITH); // ends with
+        PARAMETERS.add(EQUALS); // equals
         PARAMETERS.addExpressionBracket(DOUBLE_QUOTES); // " "
         PARAMETERS.addExpressionBracket(SINGLE_QUOTES); // ' '
     }
@@ -95,43 +97,42 @@ public class StringEvaluator extends AbstractEvaluator<String> {
         String right;
         
         if (operator == CONTAINS) {
-            left = operands.next();
-            right = operands.next();
+            left = String.valueOf(operands.next());
+            right = String.valueOf(operands.next());
             if (left.contains(right))
                 return YES;
         } else if (operator == EQUALS) {
-            left = operands.next();
-            right = operands.next();
+            left = String.valueOf(operands.next());
+            right = String.valueOf(operands.next());
             if (left.equals(right))
                 return YES;
         } else if (operator == IS_EMPTY) {
-            right = operands.next();
+            right = String.valueOf(operands.next());
             if (right.isEmpty())
                 return YES;
         } else if (operator == BEGINS_WITH) {
-            left = operands.next();
-            right = operands.next();
+            left = String.valueOf(operands.next());
+            right = String.valueOf(operands.next());
             if (left.startsWith(right))
                 return YES;
         } else if (operator == ENDS_WITH) {
-            left = operands.next();
-            right = operands.next();
+            left = String.valueOf(operands.next());
+            right = String.valueOf(operands.next());
             if (left.endsWith(right))
                 return YES;
         } else if (operator == NOT) {
-            right = operands.next();
+            right = String.valueOf(operands.next());
             if (right.equals(YES))
                 return NO;
             return YES;
         } else {
             return super.evaluate(operator, operands, evaluationContext);
         }
-        return null;
+        return NO;
     }
     
     @Override
     public String evaluate(String expression, Object evaluationContext) {
-        
         return super.evaluate(expression, evaluationContext);
     }
 }

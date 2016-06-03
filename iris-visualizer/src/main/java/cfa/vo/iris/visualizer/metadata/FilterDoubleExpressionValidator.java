@@ -119,4 +119,12 @@ public class FilterDoubleExpressionValidator {
     public void setExpression(String expression) {
         this.expression = expression;
     }
+    
+    public void setStarTable(StarTable table) {
+        this.starTable = table;
+    }
+    
+    public StarTable getStarTable() {
+        return this.starTable;
+    }
 }

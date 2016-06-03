@@ -15,9 +15,13 @@
  */
 package cfa.vo.iris.visualizer.metadata;
 
+import cfa.vo.iris.sed.ExtSed;
 import cfa.vo.iris.test.unit.TestUtils;
+import cfa.vo.iris.visualizer.stil.tables.IrisStarTable;
 import cfa.vo.iris.visualizer.stil.tables.IrisStarTableAdapter;
 import cfa.vo.sedlib.Segment;
+import cfa.vo.sedlib.io.SedFormat;
+import cfa.vo.testdata.TestData;
 import java.util.concurrent.Executors;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -91,5 +95,39 @@ public class FilterExpressionBuilderTest {
 
         assertArrayEquals(new Integer[]{0, 5, 6, 7, 8, 9, 10}, 
                 (Integer[]) validator.process(expression).toArray(new Integer[7]));
+    }
+    
+    @Test
+    public void testStringsWithLogicalOperators() throws Exception {
+        
+        Integer[] expected;
+        Integer[] results;
+        String expression;
+        
+        ExtSed sed = ExtSed.read(TestData.class.getResource("3c273.vot").openStream(), SedFormat.VOT);
+        IrisStarTable table = adapter.convertSegment(sed.getSegment(0));
+        
+        validator.setStarTable(table.getSegmentMetadataTable());
+        
+        expected = new Integer[]{0, 75, 76, 87, 88, 103, 104, 118, 
+            119, 134, 135, 147, 148, 149, 150, 151, 161, 162, 171, 172, 177, 
+            179, 181, 183, 200, 201, 202, 203, 204, 208, 222, 224, 242, 246, 
+            249, 251, 253, 268, 269, 273, 277, 279, 281, 289, 294, 296, 297, 
+            299, 301, 303, 318,329, 335, 354, 358, 364, 371, 401, 421};
+        
+        expression = "$0 contains \"1 sigma\" AND $4 isEmpty";
+        results = (Integer[]) validator.process(expression)
+                .toArray(new Integer[expected.length]);
+        assertArrayEquals(expected, results);
+        
+        expected = new Integer[]{0, 75, 76, 87, 88, 103, 104, 118, 
+            119, 134, 135, 147, 161, 162, 171, 172, 204, 208, 222, 224, 242, 
+            246, 249, 251, 253, 268, 269, 273, 277, 279, 281, 289, 296, 318, 
+            329, 335, 354, 358, 364, 371, 401, 421};
+        
+        expression = "$0 equals \"1 sigma\"";
+        results = (Integer[]) validator.process(expression)
+                .toArray(new Integer[expected.length]);
+        assertArrayEquals(expected, results);
     }
 }

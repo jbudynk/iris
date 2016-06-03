@@ -49,4 +49,12 @@ public class FilterExpressionBuilder {
         
         return new ArrayList<>(hashSetRows);
     }
+    
+    public void setStarTable(StarTable table) {
+        this.filterEvaluator.setStarTable(table);
+    }
+    
+    public StarTable getStarTable() {
+        return this.filterEvaluator.getStarTable();
+    }
 }

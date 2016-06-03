@@ -16,6 +16,12 @@
 package cfa.vo.iris.visualizer.metadata;
 
 import com.fathzer.soft.javaluator.AbstractEvaluator;
+//import cfa.vo.iris.visualizer.metadata.javaluator.AbstractEvaluator;
+//import cfa.vo.iris.visualizer.metadata.javaluator.BracketPair;
+//import cfa.vo.iris.visualizer.metadata.javaluator.Constant;
+//import cfa.vo.iris.visualizer.metadata.javaluator.Function;
+//import cfa.vo.iris.visualizer.metadata.javaluator.Operator;
+//import cfa.vo.iris.visualizer.metadata.javaluator.Parameters;
 import com.fathzer.soft.javaluator.BracketPair;
 import com.fathzer.soft.javaluator.Constant;
 import com.fathzer.soft.javaluator.Function;
@@ -34,7 +40,10 @@ import uk.ac.starlink.table.StarTable;
  * (AND, OR, and NOT).
  */
 public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
-        // logical operators
+    
+    private StarTable table;
+    
+    // logical operators
     public final static Operator NOT = new Operator("!", 2, Operator.Associativity.RIGHT, 3);
     public final static Operator AND = new Operator("&&", 2, Operator.Associativity.LEFT, 2);
     public final static Operator  OR = new Operator("||", 2, Operator.Associativity.LEFT, 1);
@@ -58,6 +67,7 @@ public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
         super(PARAMETERS);
         this.doubleFilterExpressionValidator = new FilterDoubleExpressionValidator(table, expression);
         this.stringFilterExpressionValidator = new FilterStringExpressionValidator(table, expression);
+        this.table = table;
     }
 
     /**
@@ -136,6 +146,16 @@ public class LogicalSetEvaluator extends AbstractEvaluator<HashSet> {
         } else {
             return null;
         }
+    }
+    
+    public void setStarTable(StarTable table) {
+        this.table = table;
+        this.doubleFilterExpressionValidator.setStarTable(table);
+        this.stringFilterExpressionValidator.setStarTable(table);
+    }
+    
+    public StarTable getStarTable() {
+        return this.table;
     }
     
     // check if expression has string-valued columns.
