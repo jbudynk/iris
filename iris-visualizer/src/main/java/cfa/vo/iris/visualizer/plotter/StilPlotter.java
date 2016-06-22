@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import cfa.vo.iris.sed.ExtSed;
 import cfa.vo.iris.sed.quantities.SPVYQuantity;
 import cfa.vo.iris.visualizer.preferences.LayerModel;
+import cfa.vo.iris.sed.stil.SegmentStarTable;
+import cfa.vo.iris.visualizer.preferences.EvaluatedModelLayer;
 import cfa.vo.iris.visualizer.preferences.VisualizerComponentPreferences;
 import cfa.vo.iris.visualizer.preferences.VisualizerDataModel;
 import uk.ac.starlink.ttools.plot2.geom.PlaneAspect;
@@ -229,6 +231,27 @@ public class StilPlotter extends JPanel {
         // create new aspect for zoomed view
         PlaneAspect zoomedAspect = new PlaneAspect(xlimits, ylimits);
         this.getPlotDisplay().setAspect(zoomedAspect);
+    }
+    
+    // TODO: update this when we have an interface defined for grabbing a
+    // selected ExtSed's evaluated model
+    public PlotDisplay<PlaneSurfaceFactory.Profile, PlaneAspect> plot_model(SegmentStarTable table) {
+        
+        // add evaluated model layer if model exists OR if model should be shown
+        EvaluatedModelLayer layer = new EvaluatedModelLayer(table);
+        if (layer.isShowModel()) {
+            for (String key : layer.getPreferences().keySet()) {
+                env.setValue(key, layer.getPreferences().get(key));
+            }
+        }
+        
+        // overplot the model on top of the current display
+        try {
+            return createPlotComponent(env);
+        } catch (Exception ex) {
+            Logger.getLogger(StilPlotter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
     /**
