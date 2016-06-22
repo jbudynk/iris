@@ -227,7 +227,8 @@ public class StilPlotterTest {
         StilPlotter plot = new StilPlotter(preferences);
         
         // plot the model
-        PlotDisplay<?, ?> display = plot.plot_model(evalModelTable);
+        plot.plot_model(evalModelTable);
+        PlotDisplay<?, ?> display = plot.getPlotDisplay();
         
         // check that plot env is correctly set
         MapEnvironment env = plot.getEnv();
@@ -275,7 +276,9 @@ public class StilPlotterTest {
                 .getSegment(0));
         
         // overplot the model on the StilPlotter
-        display = plot.plot_model(evalModelTable);
+        plot.plot_model(evalModelTable);
+        
+        display = plot.getPlotDisplay();
         
         // using reflection to access layers in plot display
         layers_ = PlotDisplay.class.getDeclaredField("layers_");
