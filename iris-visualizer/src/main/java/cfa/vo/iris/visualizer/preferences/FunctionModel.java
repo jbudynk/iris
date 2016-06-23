@@ -31,12 +31,12 @@ import java.util.logging.Logger;
  * Evaluated model preferences. This describes the STIL preferences for plotting 
  * an evaluated model.
  */
-public class EvaluatedModelLayer {
+public class FunctionModel {
 
     // see http://www.star.bris.ac.uk/~mbt/stilts/sun256/sun256.html#plot2plane
     // for a list of all the configurable plot properties
     
-    private static final Logger logger = Logger.getLogger(SegmentModel.class.getName());
+    private static final Logger logger = Logger.getLogger(FunctionModel.class.getName());
     
     // Override-able Settings
     public static final String TYPE = "layer";
@@ -65,7 +65,7 @@ public class EvaluatedModelLayer {
     
     private boolean show; // show the evaluated model
     
-    public EvaluatedModelLayer(SegmentStarTable table) {
+    public FunctionModel(SegmentStarTable table) {
         if (table == null) {
             throw new InvalidParameterException("star table cannot be null");
         }
@@ -157,7 +157,7 @@ public class EvaluatedModelLayer {
         return inSource;
     }
     
-    public EvaluatedModelLayer setInSource(SegmentStarTable table) {
+    public FunctionModel setInSource(SegmentStarTable table) {
         if (table == null) {
             throw new InvalidParameterException("StarTable cannot be null!");
         }
@@ -170,7 +170,7 @@ public class EvaluatedModelLayer {
         return suffix;
     }
 
-    public EvaluatedModelLayer setSuffix(String suffix) {
+    public FunctionModel setSuffix(String suffix) {
         this.suffix = suffix;
         return this;
     }
@@ -179,7 +179,7 @@ public class EvaluatedModelLayer {
         return size;
     }
 
-    public EvaluatedModelLayer setSize(int size) {
+    public FunctionModel setSize(int size) {
         this.size = size;
         return this;
     }
@@ -188,7 +188,7 @@ public class EvaluatedModelLayer {
         return color;
     }
 
-    public EvaluatedModelLayer setColor(String color) {
+    public FunctionModel setColor(String color) {
         this.color = color;
         return this;
     }
@@ -197,7 +197,7 @@ public class EvaluatedModelLayer {
         return dash;
     }
 
-    public EvaluatedModelLayer setDash(double dash) {
+    public FunctionModel setDash(double dash) {
         this.dash = dash;
         return this;
     }
@@ -206,12 +206,12 @@ public class EvaluatedModelLayer {
         return thickness;
     }
 
-    public EvaluatedModelLayer setThickness(int thickness) {
+    public FunctionModel setThickness(int thickness) {
         this.thickness = thickness;
         return this;
     }
     
-    public EvaluatedModelLayer setLayerSequence(String[] layerSequence) {
+    public FunctionModel setLayerSequence(String[] layerSequence) {
         this.legseq = layerSequence;
         return this;
     }
@@ -221,7 +221,7 @@ public class EvaluatedModelLayer {
     }
     
     // the suffix is the layer suffix name from the SedPreferences
-    public EvaluatedModelLayer setLabel(String label) {
+    public FunctionModel setLabel(String label) {
         this.leglabel = label;
         return this;
     }
