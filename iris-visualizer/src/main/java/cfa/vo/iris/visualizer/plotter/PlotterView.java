@@ -252,7 +252,7 @@ public class PlotterView extends JInternalFrame {
         mntmAutoFixed = new javax.swing.JCheckBoxMenuItem();
         mntmGridOnOff = new javax.swing.JCheckBoxMenuItem();
         mntmCoplot = new javax.swing.JMenuItem();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        mntmPlotModel = new javax.swing.JCheckBoxMenuItem();
         mnHelp = new javax.swing.JMenu();
         mntmPlotterNavigationHelp = new javax.swing.JMenuItem();
 
@@ -581,13 +581,13 @@ public class PlotterView extends JInternalFrame {
         });
         mnView.add(mntmCoplot);
 
-        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
-        jCheckBoxMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        mntmPlotModel.setText("Plot model");
+        mntmPlotModel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBoxMenuItem1ActionPerformed(evt);
+                mntmPlotModelActionPerformed(evt);
             }
         });
-        mnView.add(jCheckBoxMenuItem1);
+        mnView.add(mntmPlotModel);
 
         menuBar.add(mnView);
 
@@ -655,7 +655,7 @@ public class PlotterView extends JInternalFrame {
         GUIUtils.moveToFront(pl);
     }//GEN-LAST:event_mntmCoplotActionPerformed
 
-    private void jCheckBoxMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1ActionPerformed
+    private void mntmPlotModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mntmPlotModelActionPerformed
         try {
             // show model
             
@@ -663,7 +663,7 @@ public class PlotterView extends JInternalFrame {
             // play around with. This should be updated to show the currently
             // selected SED's model, if it exists.
 
-            if (jCheckBoxMenuItem1.isSelected()) {
+            if (mntmPlotModel.isSelected()) {
                 ExtSed sed = preferences.getDataModel().getSelectedSeds().get(0);
                 String xunits = preferences.getDataModel().getSedModel(sed).getXUnits();
                 String yunits = preferences.getDataModel().getSedModel(sed).getYUnits();
@@ -677,7 +677,7 @@ public class PlotterView extends JInternalFrame {
             Logger.getLogger(PlotterView.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-    }//GEN-LAST:event_jCheckBoxMenuItem1ActionPerformed
+    }//GEN-LAST:event_mntmPlotModelActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bottomButtonsPanel;
@@ -686,7 +686,6 @@ public class PlotterView extends JInternalFrame {
     private javax.swing.JPanel buttonPanel;
     private cfa.vo.iris.visualizer.plotter.JButtonArrow down;
     private javax.swing.JSpinner fluxOrDensity;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private cfa.vo.iris.visualizer.plotter.JButtonArrow left;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JButton metadataButton;
@@ -703,6 +702,7 @@ public class PlotterView extends JInternalFrame {
     private javax.swing.JRadioButtonMenuItem mntmLinear;
     private javax.swing.JRadioButtonMenuItem mntmLog;
     private javax.swing.JMenuItem mntmOpen;
+    private javax.swing.JCheckBoxMenuItem mntmPlotModel;
     private javax.swing.JMenuItem mntmPlotterNavigationHelp;
     private javax.swing.JMenuItem mntmProperties;
     private javax.swing.JMenuItem mntmSave;
