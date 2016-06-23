@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import uk.ac.starlink.ttools.plot2.Axis;
@@ -53,6 +54,7 @@ public class StilPlotter extends JPanel {
     // Residuals
     private PlotDisplay<PlaneSurfaceFactory.Profile, PlaneAspect> residuals;
     private boolean showResiduals = false;
+    private String residualsOrRatios = "Residuals";
 
     // List of SEDs plotted in Plotter
     private List<ExtSed> seds = new ArrayList<>();
@@ -204,8 +206,17 @@ public class StilPlotter extends JPanel {
         return showResiduals;
     }
     
-    public void setShowResdiduals(boolean on) {
+    public void setShowResiduals(boolean on) {
         this.showResiduals = on;
+        resetPlot(false, false);
+    }
+    
+    public String getResidualsOrRatios() {
+        return residualsOrRatios;
+    }
+    
+    public void setResidualsOrRatios(String residualsOrRatios) {
+        this.residualsOrRatios = residualsOrRatios;
         resetPlot(false, false);
     }
     
@@ -318,6 +329,8 @@ public class StilPlotter extends JPanel {
             
             // Create the residuals if specified
             residuals = showResiduals ? createPlotComponent(resEnv, false) : null;
+            
+            // TODO: Handle mouse listeners and zooming for the residuals!
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -344,7 +357,6 @@ public class StilPlotter extends JPanel {
         PlotDisplay<PlaneSurfaceFactory.Profile,PlaneAspect> display =
                 new PlanePlot2Task().createPlotComponent(env, false);
         
-        // TODO: Mouse listeners for the residuals?
         if (enableMouseListeners) {
             // Always update mouse listeners with the new display
             preferences.getMouseListenerManager().activateListeners(display);
@@ -383,8 +395,9 @@ public class StilPlotter extends JPanel {
 
         // Add segments and segment preferences
         for (LayerModel layer : dataModel.getLayerModels()) {
-            for (String key : layer.getPreferences().keySet()) {
-                env.setValue(key, layer.getPreferences().get(key));
+            Map<String, Object> prefs = layer.getPreferences();
+            for (String key : prefs.keySet()) {
+                env.setValue(key, prefs.get(key));
             }
         }
     }
@@ -401,13 +414,19 @@ public class StilPlotter extends JPanel {
         resEnv.setValue("type", "plot2plane");
         resEnv.setValue("insets", new Insets(20, 80, 20, 50));
         
-        resEnv.setValue("ylabel", "residuals");
+        resEnv.setValue("ylabel", residualsOrRatios);
         resEnv.setValue("xlabel", null);
         resEnv.setValue("xlog", pp.getPlotType().xlog);
         resEnv.setValue("legend", false);
         
-        // TODO: Plot something?
-        // TODO: Handle the PlaneAspect and Zooming somehow!
+        // TODO: Actually plot residuals in the FunctionModel
+        if (dataModel.getLayerModels().size() > 0) {
+            // Plot the first segment, just for funsies
+            Map<String, Object> prefs = dataModel.getLayerModels().get(0).getPreferences();
+            for (String key : prefs.keySet()) {
+                resEnv.setValue(key, prefs.get(key));
+            }
+        }
     }
     
     private void setupForPlotDisplayChange(boolean newPlot) {
