@@ -18,7 +18,9 @@ package cfa.vo.iris.visualizer.plotter;
 import javax.swing.JPanel;
 import cfa.vo.iris.sed.ExtSed;
 import cfa.vo.iris.sed.quantities.SPVYQuantity;
+import cfa.vo.iris.visualizer.preferences.FunctionModel;
 import cfa.vo.iris.visualizer.preferences.LayerModel;
+import cfa.vo.iris.visualizer.preferences.SedModel;
 import cfa.vo.iris.visualizer.preferences.VisualizerComponentPreferences;
 import cfa.vo.iris.visualizer.preferences.VisualizerDataModel;
 import java.awt.Dimension;
@@ -414,15 +416,29 @@ public class StilPlotter extends JPanel {
         resEnv.setValue("type", "plot2plane");
         resEnv.setValue("insets", new Insets(20, 80, 20, 50));
         
+        resEnv.setValue(PlotPreferences.SIZE, pp.getSize());
+        resEnv.setValue("xlog", pp.getPlotType().xlog);
+        
         resEnv.setValue("ylabel", residualsOrRatios);
         resEnv.setValue("xlabel", null);
-        resEnv.setValue("xlog", pp.getPlotType().xlog);
         resEnv.setValue("legend", false);
         
-        // TODO: Actually plot residuals in the FunctionModel
-        if (dataModel.getLayerModels().size() > 0) {
-            // Plot the first segment, just for funsies
-            Map<String, Object> prefs = dataModel.getLayerModels().get(0).getPreferences();
+        // Add the function layer model for each FunctionModel available in the 
+        // dataModel
+        for (SedModel sedModel : dataModel.getSedModels()) {
+            // If no model available (e.g. no fit) skip it
+            FunctionModel mod = sedModel.getFunctionModel();
+            if (mod == null) {
+                continue;
+            }
+            
+            // If no residuals available Skip
+            LayerModel layer = mod.getResidualsLayerModel(residualsOrRatios);
+            if (layer == null) {
+                continue;
+            }
+            
+            Map<String, Object> prefs = layer.getPreferences();
             for (String key : prefs.keySet()) {
                 resEnv.setValue(key, prefs.get(key));
             }
