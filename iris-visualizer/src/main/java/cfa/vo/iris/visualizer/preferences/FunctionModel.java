@@ -36,6 +36,8 @@ public class FunctionModel {
     public static final String RATIO = "ratio";
     public static final String RESIDUAL = "residual";
     
+    public static final String FUNCTION_SUFFIX = "_MODEL";
+    
     private static final Logger logger = Logger.getLogger(FunctionModel.class.getName());
     
     private SortedStarTable sortedStackedStarTable;
@@ -61,7 +63,7 @@ public class FunctionModel {
             
             // create a table sorted by the spectral axis
             sortedStackedStarTable = new SortedStarTable(stackedTable, col, true);
-            sortedStackedStarTable.setName(stackedTable.getName()+"_FUNCTION");
+            sortedStackedStarTable.setName(stackedTable.getName()+FUNCTION_SUFFIX);
             
         } catch (IOException ex) {
             Logger.getLogger(FunctionModel.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,9 +74,12 @@ public class FunctionModel {
     public LayerModel getFunctionLayerModel() {
         
         LayerModel layer = new LayerModel(sortedStackedStarTable);
+        layer.setShowErrorBars(false);
+        layer.setShowMarks(false);
+        layer.setShowLines(true);
         layer.setLayerType(LayerType.line.name());
         layer.setX(SegmentColumn.Column.Spectral_Value.name());
-        layer.setY(SegmentColumn.Column.Evaluated_Model.name());
+        layer.setY(SegmentColumn.Column.Model_Values.name());
         layer.setLineColor(getFunctionColor());
         layer.setLineThickness(getFunctionThickness());
         layer.setLineDash(getFunctionDash());
@@ -86,7 +91,7 @@ public class FunctionModel {
         LayerModel layer = new LayerModel(sortedStackedStarTable);
         if (residualType.equals(RATIO)) {
             layer.setX(SegmentColumn.Column.Spectral_Value.name());
-            layer.setY(SegmentColumn.Column.Residuals_Ratio.name());
+            layer.setY(SegmentColumn.Column.Ratios.name());
         } else if (residualType.equals(RESIDUAL)) {
             layer.setX(SegmentColumn.Column.Spectral_Value.name());
             layer.setY(SegmentColumn.Column.Residuals.name());
@@ -94,6 +99,10 @@ public class FunctionModel {
             throw new IllegalArgumentException("Unrecognized residual type. "
                     + "Must be \"ratio\" or \"residual\"");
         }
+        
+        layer.setShowErrorBars(false);
+        layer.setShowMarks(true);
+        
         return layer;
     }
     

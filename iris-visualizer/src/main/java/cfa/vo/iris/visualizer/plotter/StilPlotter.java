@@ -59,7 +59,7 @@ public class StilPlotter extends JPanel {
     // Residuals
     private PlotDisplay<PlaneSurfaceFactory.Profile, PlaneAspect> residuals;
     private boolean showResiduals = false;
-    private String residualsOrRatios = "Residuals";
+    private String residualsOrRatios = FunctionModel.RESIDUAL;
 
     // List of SEDs plotted in Plotter
     private List<ExtSed> seds = new ArrayList<>();
@@ -405,6 +405,22 @@ public class StilPlotter extends JPanel {
                 env.setValue(key, prefs.get(key));
             }
         }
+        
+        // add model functions
+        for (SedModel sedModel : dataModel.getSedModels()) {
+            // If no model available (e.g. no fit) skip it
+            FunctionModel mod = sedModel.getFunctionModel();
+            if (mod == null) {
+                continue;
+            }
+            LayerModel layer = mod.getFunctionLayerModel();
+            Map<String, Object> prefs = layer.getPreferences();
+            for (String key : prefs.keySet()) {
+                env.setValue(key, prefs.get(key));
+            }
+            
+        }
+        
     }
     
     private void setupResidualMapEnvironment() throws Exception {

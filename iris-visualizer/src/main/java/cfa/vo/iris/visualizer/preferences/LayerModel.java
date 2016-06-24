@@ -64,6 +64,7 @@ public class LayerModel {
     
     private boolean showErrorBars;
     private boolean showMarks;
+    private boolean showLine; // for models/functions
     
     private String xColName;
     private String yColName;
@@ -102,6 +103,7 @@ public class LayerModel {
         
         this.showErrorBars = true;
         this.showMarks = true;
+        this.showLine = false;
     }
 
     /**
@@ -131,6 +133,14 @@ public class LayerModel {
         if (showErrorBars) {
             addErrorFields(suffix + ERROR_SUFFIX, preferences);
         }
+        
+        if (showLine) {
+            addLineFields(suffix, preferences);
+        }
+        
+        // if neither marks nor errors are shown, just add the common fields.
+        if (preferences.isEmpty())
+            addCommonFields(suffix, preferences);
         
         return preferences;
     }
@@ -183,6 +193,18 @@ public class LayerModel {
             prefs.put(COLOR + suffix, markColor);
         if (markColorWeight != null)
             prefs.put(markShading.name + suffix, markColorWeight);
+        
+        addCommonFields(suffix, prefs);
+    }
+    
+    private void addLineFields(String suffix, Map<String, Object> prefs) {
+        prefs.put(TYPE + suffix, LayerType.line.name());
+        if (lineColor != null)
+            prefs.put(LINE_COLOR + suffix, lineColor);
+        if (markColorWeight != null)
+            prefs.put(LINE_DASH + suffix, lineDash);
+        if (lineThickness != null)
+            prefs.put(LINE_THICK, lineThickness);
         
         addCommonFields(suffix, prefs);
     }
@@ -249,6 +271,15 @@ public class LayerModel {
 
     public LayerModel setShowMarks(boolean showMarks) {
         this.showMarks = showMarks;
+        return this;
+    }
+    
+    public boolean getShowLines() {
+        return showLine;
+    }
+    
+    public LayerModel setShowLines(boolean showLine) {
+        this.showLine = showLine;
         return this;
     }
     

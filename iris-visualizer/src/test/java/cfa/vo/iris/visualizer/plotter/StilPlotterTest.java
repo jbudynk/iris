@@ -284,7 +284,7 @@ public class StilPlotterTest {
         StilPlotter plot = setUpTests(sed);
         
         SedModel model = plot.getPreferences().getDataModel().getSedModel(sed);
-        
+        model.getDataTables().get(0).getPlotterDataTable().setModelValues(seg.getFluxAxisValues());
         FunctionModel functionModel = new FunctionModel(model);
         
         LayerModel layer = functionModel.getFunctionLayerModel();
@@ -319,9 +319,9 @@ public class StilPlotterTest {
         layers_.setAccessible(true);
         PlotLayer[] layers = (PlotLayer[]) layers_.get(display);
         
-        // there should be 2 layers for the function/model and sed data
+        // there should be 3 layers for the function/model, flux, and errs
         assertTrue(!ArrayUtils.isEmpty(layers));
-        assertEquals(2, ArrayUtils.getLength(layers));
+        assertEquals(3, ArrayUtils.getLength(layers));
     }
     
     private StilPlotter setUpTests(ExtSed sed) throws Exception {
