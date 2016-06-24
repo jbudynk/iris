@@ -660,8 +660,8 @@ public class PlotterView extends JInternalFrame {
             // show model
             
             // TODO: right now, it just overplots a flattened-version of the SED to
-            // play around with. This should be updated to show the currently
-            // selected SED's model, if it exists.
+            // play around with. This should be updated to either show or hide
+            // the model; the function model should already be in the preferneces
 
             if (mntmPlotModel.isSelected()) {
                 ExtSed sed = preferences.getDataModel().getSelectedSeds().get(0);

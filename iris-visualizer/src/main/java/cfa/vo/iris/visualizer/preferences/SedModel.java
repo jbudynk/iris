@@ -16,6 +16,7 @@
 
 package cfa.vo.iris.visualizer.preferences;
 
+import cfa.vo.iris.fitting.FitConfiguration;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
@@ -56,6 +57,7 @@ public class SedModel {
     private String xunits;
     private String yunits;
     
+//    private Map<FitConfiguration, FunctionModel> evalModel;
     private FunctionModel evalModel;
     public final static String DefaultModelColor = "red";
     
@@ -66,8 +68,8 @@ public class SedModel {
         
         this.starTableData = Collections.synchronizedMap(new IdentityHashMap<Segment, IrisStarTable>());
         this.tableLayerModels = Collections.synchronizedMap(new IdentityHashMap<Segment, LayerModel>());
-        this.evalModel = new FunctionModel(); // empty function model
-        
+//        this.evalModel = Collections.synchronizedMap(new IdentityHashMap<FitConfiguration, FunctionModel>()); // empty function model
+        this.evalModel = new FunctionModel();
         refresh();
     }
     
@@ -116,8 +118,8 @@ public class SedModel {
     }
     
     /**
-     * @return A list of all LayerModels for each Segment in this SED. List is in the same
-     * order as they appear in the SED.
+     * @return A list of all LayerModels for each Segment and FunctionModel in this SED. 
+     * List of Segment layers is in the same order as they appear in the SED.
      */
     public List<LayerModel> getLayerModels() {
         List<LayerModel> ret = new LinkedList<>();
@@ -127,6 +129,19 @@ public class SedModel {
                 ret.add(tableLayerModels.get(seg));
             }
         }
+        
+        
+//        for (int i = 0; i < evalModel.size(); i++) {
+//            if (evalModel.containsKey(i) != null) {
+//                ret.add(new LayerModel(evalModel.getInSource()));
+//            }
+//        }
+        
+        // add a funtion model layer if it exists
+        if (evalModel != null) {
+            ret.add(new LayerModel(evalModel.getInSource()));
+        }
+        
         return ret;
     }
     
