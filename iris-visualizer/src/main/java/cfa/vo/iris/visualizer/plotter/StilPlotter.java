@@ -268,40 +268,6 @@ public class StilPlotter extends JPanel {
         this.getPlotDisplay().setAspect(zoomedAspect);
     }
     
-    // TODO: update this when we have an interface defined for grabbing a
-    // selected ExtSed's evaluated model
-    /**
-     * Overplot a function on the plotter.
-     * @param table - a SegmentStarTable containing the X and Y values of the 
-     * function to plot
-     */
-    public void plotModel(SegmentStarTable table) {
-        
-        // add function model layer if model exists OR if model should be shown
-        FunctionModel layer = new FunctionModel(table);
-        if (layer.isShowModel()) {
-            for (String key : layer.getPreferences().keySet()) {
-                env.setValue(key, layer.getPreferences().get(key));
-            }
-        }
-        
-        // overplot the model on top of the current display
-        try {
-            resetPlot(false, false, env);
-        } catch (Exception ex) {
-            Logger.getLogger(StilPlotter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public void remove_model() {
-        
-        try {
-            resetPlot(false, false);
-        } catch (Exception ex) {
-            Logger.getLogger(StilPlotter.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
     /**
      * Calculate new zoomed axis range.
      * @param zoomFactor - scale factor to zoom in/out by

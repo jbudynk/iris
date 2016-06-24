@@ -24,6 +24,7 @@ import cfa.vo.iris.units.UnitsException;
 import cfa.vo.iris.visualizer.metadata.MetadataBrowserMainView;
 import cfa.vo.iris.visualizer.plotter.PlotPreferences.PlotType;
 import cfa.vo.iris.visualizer.preferences.CoPlotManagementWindow;
+import cfa.vo.iris.visualizer.preferences.FunctionModel;
 import cfa.vo.iris.visualizer.preferences.VisualizerComponentPreferences;
 import cfa.vo.iris.visualizer.preferences.VisualizerDataModel;
 import cfa.vo.sedlib.common.SedException;
@@ -252,7 +253,6 @@ public class PlotterView extends JInternalFrame {
         mntmAutoFixed = new javax.swing.JCheckBoxMenuItem();
         mntmGridOnOff = new javax.swing.JCheckBoxMenuItem();
         mntmCoplot = new javax.swing.JMenuItem();
-        mntmPlotModel = new javax.swing.JCheckBoxMenuItem();
         mnHelp = new javax.swing.JMenu();
         mntmPlotterNavigationHelp = new javax.swing.JMenuItem();
 
@@ -581,14 +581,6 @@ public class PlotterView extends JInternalFrame {
         });
         mnView.add(mntmCoplot);
 
-        mntmPlotModel.setText("Plot model");
-        mntmPlotModel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mntmPlotModelActionPerformed(evt);
-            }
-        });
-        mnView.add(mntmPlotModel);
-
         menuBar.add(mnView);
 
         mnHelp.setText("Help");
@@ -655,30 +647,6 @@ public class PlotterView extends JInternalFrame {
         GUIUtils.moveToFront(pl);
     }//GEN-LAST:event_mntmCoplotActionPerformed
 
-    private void mntmPlotModelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mntmPlotModelActionPerformed
-        try {
-            // show model
-            
-            // TODO: right now, it just overplots a flattened-version of the SED to
-            // play around with. This should be updated to either show or hide
-            // the model; the function model should already be in the preferneces
-
-            if (mntmPlotModel.isSelected()) {
-                ExtSed sed = preferences.getDataModel().getSelectedSeds().get(0);
-                String xunits = preferences.getDataModel().getSedModel(sed).getXUnits();
-                String yunits = preferences.getDataModel().getSedModel(sed).getYUnits();
-
-                SegmentStarTable model = new SegmentStarTable(ExtSed.flatten(sed, xunits, yunits).getSegment(0), title);
-                plotter.plotModel(model);
-            } else {
-                plotter.remove_model();
-            }
-        } catch (SedException | UnitsException ex) {
-            Logger.getLogger(PlotterView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }//GEN-LAST:event_mntmPlotModelActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bottomButtonsPanel;
     private javax.swing.JButton btnReset;
@@ -702,7 +670,6 @@ public class PlotterView extends JInternalFrame {
     private javax.swing.JRadioButtonMenuItem mntmLinear;
     private javax.swing.JRadioButtonMenuItem mntmLog;
     private javax.swing.JMenuItem mntmOpen;
-    private javax.swing.JCheckBoxMenuItem mntmPlotModel;
     private javax.swing.JMenuItem mntmPlotterNavigationHelp;
     private javax.swing.JMenuItem mntmProperties;
     private javax.swing.JMenuItem mntmSave;
