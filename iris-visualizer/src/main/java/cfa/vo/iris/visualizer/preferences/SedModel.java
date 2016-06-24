@@ -99,6 +99,13 @@ public class SedModel {
     }
     
     /**
+     * @return FunctionModel for the fit on this SED, if available.
+     */
+    public FunctionModel getFunctionModel() {
+        return new FunctionModel(this);
+    }
+    
+    /**
      * @return A list of IrisStarTables for each Segment in this SED. List is in the same
      * order as they appear in the SED.
      */

@@ -34,6 +34,7 @@ import cfa.vo.sedlib.io.SedFormat;
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.ac.starlink.task.StringParameter;
 import uk.ac.starlink.ttools.plot2.PlotLayer;
@@ -219,7 +220,57 @@ public class StilPlotterTest {
         assertEquals(Math.log10(xmin), Math.log10(aspect1.getXMin()), 0.000001);
         assertEquals(Math.log10(ymax), Math.log10(aspect1.getYMax()), 0.000001);
         assertEquals(Math.log10(ymin), Math.log10(aspect1.getYMin()), 0.000001);
+    }
+    
+    
+    @Test
+    public void testResiduals() throws Exception {
+        ExtSed sed = new ExtSed("test", false);
+        StilPlotter plot = setUpTests(sed);
         
+        assertFalse(plot.isShowResiduals());
+        assertNull(plot.getResEnv());
+        assertNull(plot.getResidualsPlotDisplay());
+        
+        // Plot residuals (set by default)
+        plot.setShowResiduals(true);
+        MapEnvironment resEnv = plot.getResEnv();
+        PlotDisplay<Profile, PlaneAspect> res = plot.getResidualsPlotDisplay();
+        
+        assertNotNull(resEnv);
+        assertNotNull(res);
+        
+        // Verify y axis label
+        StringParameter par = new StringParameter("ylabel");
+        resEnv.acquireValue(par);
+        assertEquals(par.objectValue(resEnv), "Residuals");
+        
+        // Plot ratios
+        plot.setResidualsOrRatios("Ratios");
+        res = plot.getResidualsPlotDisplay();
+        resEnv = plot.getResEnv();
+        
+        // Reverify settings
+        par = new StringParameter("ylabel");
+        resEnv.acquireValue(par);
+        assertEquals(par.objectValue(resEnv), "Ratios");
+    }
+
+    // TODO: Make this work when the secondary plot is attached to the plot zoom.
+    @Test
+    @Ignore
+    public void testResidualsZoom() throws Exception {
+        ExtSed sed = new ExtSed("test", false);
+        StilPlotter plot = setUpTests(sed);
+
+        plot.setShowResiduals(true);
+
+        PlotDisplay<Profile, PlaneAspect> disp = plot.getPlotDisplay();
+        PlotDisplay<Profile, PlaneAspect> res = plot.getResidualsPlotDisplay();
+        
+        plot.zoom(1.05);
+        assertEquals(disp.getAspect().getXMax(), res.getAspect().getXMax(), 0.01);
+        assertEquals(disp.getAspect().getXMin(), res.getAspect().getXMin(), 0.01);
     }
     
     @Test
