@@ -20,6 +20,7 @@ import cfa.vo.iris.events.SedEvent;
 import cfa.vo.iris.events.SedListener;
 import cfa.vo.iris.fitting.custom.DefaultCustomModel;
 import cfa.vo.iris.fitting.custom.ModelsListener;
+import cfa.vo.iris.gui.GUIUtils;
 import cfa.vo.iris.gui.NarrowOptionPane;
 import cfa.vo.iris.sed.ExtSed;
 import cfa.vo.iris.visualizer.IrisVisualizer;
@@ -48,6 +49,8 @@ public class FittingMainView extends JInternalFrame implements SedListener {
     private JFileChooser chooser;
     private VisualizerDataStore dataStore;
     private VisualizerComponentPreferences preferences;
+    
+    private FittingRangesFrame fittingRangesFrame;
     
     public final String DEFAULT_DESCRIPTION = "Double click on a Component to add it to the list of selected Components.";
     public final String CUSTOM_DESCRIPTION = "User Model";
@@ -138,7 +141,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
         jLabel2 = new javax.swing.JLabel();
         statisticCombo = new javax.swing.JComboBox();
         fitButton = new javax.swing.JButton();
-        addFitRangeButton = new javax.swing.JButton();
+        addRangeFromPlotButton = new javax.swing.JButton();
         clearRangesButton = new javax.swing.JButton();
         modelViewerPanel = new cfa.vo.iris.gui.widgets.ModelViewerPanel();
         jSplitPane2 = new javax.swing.JSplitPane();
@@ -161,6 +164,8 @@ public class FittingMainView extends JInternalFrame implements SedListener {
         loadJsonMenuItem = new javax.swing.JMenuItem();
         saveTextMenuItem = new javax.swing.JMenuItem();
         saveJsonMenuItem = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        mntmAddEditFitRanges = new javax.swing.JMenuItem();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -204,12 +209,12 @@ public class FittingMainView extends JInternalFrame implements SedListener {
             }
         });
 
-        addFitRangeButton.setText("Add Range");
-        addFitRangeButton.setToolTipText("Add a fitting range using the plotter.");
-        addFitRangeButton.setName("addFittingRange"); // NOI18N
-        addFitRangeButton.addActionListener(new java.awt.event.ActionListener() {
+        addRangeFromPlotButton.setText("Add Range");
+        addRangeFromPlotButton.setToolTipText("Add a fitting range using the plotter.");
+        addRangeFromPlotButton.setName("addFittingRange"); // NOI18N
+        addRangeFromPlotButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addFitRangeButtonActionPerformed(evt);
+                addRangeFromPlotButtonActionPerformed(evt);
             }
         });
 
@@ -234,7 +239,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
                     .addComponent(jLabel2)
                     .addComponent(fitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(addFitRangeButton)
+                        .addComponent(addRangeFromPlotButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(clearRangesButton)))
                 .addContainerGap())
@@ -252,7 +257,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
                 .addComponent(statisticCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(addFitRangeButton)
+                    .addComponent(addRangeFromPlotButton)
                     .addComponent(clearRangesButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
                 .addComponent(fitButton)
@@ -441,6 +446,18 @@ public class FittingMainView extends JInternalFrame implements SedListener {
 
         menuBar.add(fileMenu);
 
+        jMenu1.setText("Edit");
+
+        mntmAddEditFitRanges.setText("Add/Edit Fitting Ranges...");
+        mntmAddEditFitRanges.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mntmAddEditFitRangesActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mntmAddEditFitRanges);
+
+        menuBar.add(jMenu1);
+
         setJMenuBar(menuBar);
 
         bindingGroup.bind();
@@ -474,7 +491,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
         modelViewerPanel.updateUI();
     }//GEN-LAST:event_doFit
 
-    private void addFitRangeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFitRangeButtonActionPerformed
+    private void addRangeFromPlotButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRangeFromPlotButtonActionPerformed
         // if there are no SEDs, don't set the fitting ranges
         if (this.getSedModel() == null) {
             return;
@@ -488,14 +505,22 @@ public class FittingMainView extends JInternalFrame implements SedListener {
             return;
         }
         listener.setPickingRanges(true);
-    }//GEN-LAST:event_addFitRangeButtonActionPerformed
+        GUIUtils.moveToFront(listener.getPlotterView());
+    }//GEN-LAST:event_addRangeFromPlotButtonActionPerformed
 
     private void clearRangesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearRangesButtonActionPerformed
         controller.getFit().clearFittingRanges();
     }//GEN-LAST:event_clearRangesButtonActionPerformed
 
+    private void mntmAddEditFitRangesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mntmAddEditFitRangesActionPerformed
+        fittingRangesFrame = new FittingRangesFrame(preferences, controller);
+        this.getDesktopPane().add(fittingRangesFrame);
+        this.getDesktopPane().setLayer(fittingRangesFrame, 1);
+        GUIUtils.moveToFront(fittingRangesFrame);
+    }//GEN-LAST:event_mntmAddEditFitRangesActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addFitRangeButton;
+    private javax.swing.JButton addRangeFromPlotButton;
     private javax.swing.JPanel availableComponents;
     private javax.swing.JTree availableTree;
     private javax.swing.JButton clearRangesButton;
@@ -508,6 +533,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
     private javax.swing.JButton fitButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
@@ -520,6 +546,7 @@ public class FittingMainView extends JInternalFrame implements SedListener {
     private javax.swing.JSplitPane jSplitPane4;
     private javax.swing.JMenuItem loadJsonMenuItem;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem mntmAddEditFitRanges;
     private javax.swing.JPanel modelPanel;
     private cfa.vo.iris.gui.widgets.ModelViewerPanel modelViewerPanel;
     private javax.swing.JComboBox optimizationCombo;
