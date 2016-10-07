@@ -344,7 +344,7 @@ public class FittingRangesFrame extends javax.swing.JInternalFrame {
         }
 
         // refresh the plot to show new fitting range
-        preferences.getDataModel().refresh();
+        //preferences.getDataModel().refresh();
         
         // update table
         updateTable();
