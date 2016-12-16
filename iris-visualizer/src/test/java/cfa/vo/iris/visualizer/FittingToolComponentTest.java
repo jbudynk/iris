@@ -31,10 +31,7 @@ import cfa.vo.sherpa.optimization.OptimizationMethod;
 import cfa.vo.sherpa.stats.Statistic;
 import com.google.common.io.Files;
 import net.javacrumbs.jsonunit.JsonAssert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 
 import static org.junit.Assert.*;
 
@@ -268,6 +265,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         nonExistentFile("Load Json...");
     }
 
+    @Ignore
     @Test
     public void testSetFittingRangesNoPlotter() throws Exception {
         // check that a warning is shown if the user adds a fitting range
@@ -280,7 +278,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
 
         WindowInterceptor wi = WindowInterceptor.init(
                 rangesWindow.getButton("Add from plot").triggerClick());
-        
+
         String message = "The Visualizer must be open before selecting a fitting range.";
         wi.process(BasicHandler.init()
                 .assertContainsText(message)
