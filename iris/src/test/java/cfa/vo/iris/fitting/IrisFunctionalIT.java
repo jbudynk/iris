@@ -482,16 +482,11 @@ public class IrisFunctionalIT extends AbstractUISpecTest {
     }
 
     protected void loadSed(String name, String[][] table) throws Exception {
-        TestUtils.invokeWithRetry(50, 100, new Runnable() {
-            @Override
-            public void run() {
-                window.getMenuBar().getMenu("Tools").getSubMenu("SED Builder").getSubMenu("SED Builder").click();
-                desktop.containsWindow("SED Builder").check();
-                builder.getButton("New").click();
-                desktop.getWindow("SED Builder").getButton("Load File").click();
-                desktop.containsWindow("Load an input File").check();
-            }
-        });
+        window.getMenuBar().getMenu("Tools").getSubMenu("SED Builder").getSubMenu("SED Builder").click();
+        desktop.containsWindow("SED Builder").check();
+        builder.getButton("New").click();
+        desktop.getWindow("SED Builder").getButton("Load File").click();
+        desktop.containsWindow("Load an input File").check();
 
         Window loader = desktop.getWindow("Load an input File");
         loader.getRadioButton("Location on Disk").click();
