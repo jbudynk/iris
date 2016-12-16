@@ -60,7 +60,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         windowName = "Fitting Tool";
         sedManager = (SedlibSedManager) app.getWorkspace().getSedManager();
     }
-    
+
     @After
     public void tearDown() throws Exception {
         if (sedManager.getSeds() != null) {
@@ -78,16 +78,16 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
     @Test
     public void testFittingNoSed() throws Exception {
         WindowInterceptor wi = WindowInterceptor.init(
-            window.getMenuBar()
-                .getMenu("Tools")
-                .getSubMenu(comp.getName())
-                .getSubMenu(comp.getName())
-                .triggerClick()
+                window.getMenuBar()
+                        .getMenu("Tools")
+                        .getSubMenu(comp.getName())
+                        .getSubMenu(comp.getName())
+                        .triggerClick()
         );
-        
+
         wi.process(BasicHandler.init().triggerButtonClick("OK")).run();
     }
-    
+
     @Test
     public void testFittingEmptySed() throws Exception {
         final Window mainFit = setupFitWindow(sedManager.newSed("TestSed"));
@@ -102,7 +102,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         final Window mainFit = setupFitWindow(sedManager.newSed("TestSed"));
         assertEquals("TestSed", mainFit.getTextBox("currentSedField").getText());
         sedManager.newSed("TestSed2");
-        TestUtils.invokeWithRetry(50, 100, new Runnable(){
+        TestUtils.invokeWithRetry(50, 100, new Runnable() {
             @Override
             public void run() {
                 assertEquals("TestSed2", mainFit.getTextBox("currentSedField").getText());
@@ -116,7 +116,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         addFit(sed);
         final Window mainFit = setupFitWindow(sed);
 
-        TestUtils.invokeWithRetry(50, 100, new Runnable(){
+        TestUtils.invokeWithRetry(50, 100, new Runnable() {
             @Override
             public void run() {
                 assertEquals("m", mainFit.getTextBox("modelExpressionField").getText());
@@ -126,7 +126,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         Tree modelsTree = mainFit.getTree("modelsTree");
         modelsTree.click("polynomial.m/m.c0");
 
-        TestUtils.invokeWithRetry(50, 100, new Runnable(){
+        TestUtils.invokeWithRetry(50, 100, new Runnable() {
             @Override
             public void run() {
                 assertEquals("1.0", mainFit.getInputTextBox("Par Val").getText());
@@ -135,7 +135,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
 
         final ComboBox statisticCombo = mainFit.getComboBox("statisticCombo");
         final ComboBox optimizationCombo = mainFit.getComboBox("optimizationCombo");
-        TestUtils.invokeWithRetry(50, 100, new Runnable(){
+        TestUtils.invokeWithRetry(50, 100, new Runnable() {
             @Override
             public void run() {
                 assertTrue(statisticCombo.selectionEquals("LeastSquares").isTrue());
@@ -153,7 +153,7 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
         final TextBox descriptionArea = mainFit.getTextBox("descriptionArea");
         availableTree.click("Preset Model Components/absorptionedge");
 
-        TestUtils.invokeWithRetry(50, 100, new Runnable(){
+        TestUtils.invokeWithRetry(50, 100, new Runnable() {
             @Override
             public void run() {
                 assertEquals("Optical model of interstellar absorption", descriptionArea.getText());
@@ -267,30 +267,25 @@ public class FittingToolComponentTest extends AbstractComponentGUITest {
     public void testLoadJsonNonExistentFile() throws Exception {
         nonExistentFile("Load Json...");
     }
-    
+
     @Test
     public void testSetFittingRangesNoPlotter() throws Exception {
         // check that a warning is shown if the user adds a fitting range
         // when the visualizer isn't open / visible
         final Window mainFit = setupFitWindow(sedManager.newSed("TestSed"));
-        
+
         mainFit.getButton("Add Ranges...").click();
+
+        Window rangesWindow = desktop.getWindow("Fitting Ranges Manager");
+
+        WindowInterceptor wi = WindowInterceptor.init(
+                rangesWindow.getButton("Add from plot").triggerClick());
         
-        final Window rangesWindow = desktop.getWindow("Fitting Ranges Manager");
-        
-        TestUtils.invokeWithRetry(50, 100, new Runnable() {
-            
-            @Override
-            public void run() {
-                WindowInterceptor wi = WindowInterceptor.init(
-                        rangesWindow.getButton("Add from plot").triggerClick());
-                String message = "The Visualizer must be open before selecting a fitting range.";
-                wi.process(BasicHandler.init()
-                        .assertContainsText(message)
-                        .triggerButtonClick("OK"))
-                        .run();
-            }
-        });
+        String message = "The Visualizer must be open before selecting a fitting range.";
+        wi.process(BasicHandler.init()
+                .assertContainsText(message)
+                .triggerButtonClick("OK"))
+                .run();
     }
     
     private Window setupFitWindow(final ExtSed sed) throws Exception {
